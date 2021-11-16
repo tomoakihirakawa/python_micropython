@@ -141,20 +141,23 @@ class ServerUDP():
             self.display_text(str(self.ssid), 0)
             ap = connectToNetwork(ssid=self.ssid, pwd=self.password)
             if not ap:
-                for i in range(10):
-                    ssid_pwd = {"TimeCapsule": "Tomoaki813;",
-                                "CE317_gakusei": "dobokuday1118",
-                                "TH15": "8ry37sc2",
-                                "CE317": "dobokuday1118"}
-                    for ssid, pwd in ssid_pwd.items():
-                        if not ap:
-                            self.ssid = ssid
-                            self.password = pwd
-                            self.display_text(str(self.ssid), 0)
-                            ap = connectToNetwork(
-                                ssid=self.ssid, pwd=self.password)
-                        else:
-                            break
+                try:
+                    inputfile = open('ssid_pwd.json', encoding='utf-8')
+                    print("ssid_pwd.json has opened")
+                    ssid_pwd = json.load(inputfile)
+                    inputfile.close()
+                    for i in range(10):
+                        for ssid, pwd in ssid_pwd.items():
+                            if not ap:
+                                self.ssid = ssid
+                                self.password = pwd
+                                self.display_text(str(self.ssid), 0)
+                                ap = connectToNetwork(
+                                    ssid=self.ssid, pwd=self.password)
+                            else:
+                                break
+                except IOError:
+                    print("ssid_pwd.json can not be opened")
 
             self.HOST = ap.ifconfig()[0]
         else:
