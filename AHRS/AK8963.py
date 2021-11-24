@@ -194,7 +194,7 @@ class AK8963:
         status = read_byte_data(self.bus, self.addrAK8963, self.AK8963_ST1, 1)
         while (status[0] & 0x01) != 0x01:
             # データレディ状態まで待つ
-            time.sleep(0.005)
+            time.sleep(0.002)
             status = read_byte_data(
                 self.bus, self.addrAK8963, self.AK8963_ST1, 1)
 

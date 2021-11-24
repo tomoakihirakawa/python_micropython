@@ -48,8 +48,8 @@ class steppermotor():
         self.DIR = 1
         self.dir(self.DIR)
         # ---------------------
-        self.asymptotic_looop = None
-        self.wave_looop = None
+        self.asymptotic_loop = None
+        self.wave_loop = None
         # ---------------------
         print("freq ", self.FREQ)
         print("Pin_dir ", self.Pin_dir)
@@ -98,18 +98,18 @@ class steppermotor():
 
     def exit_asymptotic(self):
         try:
-            self.asymptotic_looop.exit()
+            self.asymptotic_loop.exit()
         except:
             pass
 
     def start_asymptotic(self, base_freq):
         self.exit_asymptotic()
-        self.asymptotic_looop = _thread.start_new_thread(
+        self.asymptotic_loop = _thread.start_new_thread(
             self.asymptotic, (base_freq,))
 
     # -------------------------------------------------------- #
 
-    def wave(self, AT):
+    def sin_wave(self, AT):
         '''
         この関数は周波数freq(Hz)であり，freq(step/秒)でもある．
         マイクロステップ8を使った場合，1600(step/1回転)なので，1600で割ることで，W = freq/1600 (回転/秒)になる．
@@ -136,16 +136,29 @@ class steppermotor():
             # sleep(0.001)
             self.freq(round(A*math.sin(2.*math.pi*((time_ns()-s)*10**-9)/T)))
 
+    def cos_wave(self, AT):
+        s = time_ns()
+        t = s
+        A, T = AT
+        while True:
+            # sleep(0.001)
+            self.freq(round(A*math.cos(2.*math.pi*((time_ns()-s)*10**-9)/T)))
+
     def exit_wave(self):
         try:
-            self.wave_looop.exit()
+            self.wave_loop.exit()
         except:
             pass
 
-    def start_wave(self, AT):
+    def start_sin_wave(self, AT):
         self.exit_wave()
-        self.wave_looop = _thread.start_new_thread(
-            self.wave, (AT,))
+        self.wave_loop = _thread.start_new_thread(
+            self.sin_wave, (AT,))
+
+    def start_cos_wave(self, AT):
+        self.exit_wave()
+        self.wave_loop = _thread.start_new_thread(
+            self.cos_wave, (AT,))
 
     # -------------------------------------------------------- #
 
@@ -158,7 +171,7 @@ if __name__ == '__main__':
 
     motor = steppermotor(dir=12, step=13)
     motor.start()
-    motor.start_wave((1600, 1))
+    motor.start_sin_wave((1600, 1))
     sleep(100)
     # motor.start_asymptotic(5000)
     # for i in range(100):

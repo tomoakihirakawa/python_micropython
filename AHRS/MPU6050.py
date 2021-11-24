@@ -61,24 +61,25 @@ class MPU6050:
         self.M = [zero4, zero4, zero4, zero4]
         print("\u001b[35m"+"MPU6050 is initialized"+"\u001b[0m")
     # -------------------------------------------------------- #
-
-    def bytes2int(self, firstbyte, secondbyte):
-        if _MicroPython_:
+    if _MicroPython_:
+        def bytes2int(self, firstbyte, secondbyte):
             # オーバーフローのチェック
             if not firstbyte & 0x80:
                 return firstbyte << 8 | secondbyte
             return - (((firstbyte ^ 255) << 8) | (secondbyte ^ 255) + 1)
-        else:
+    else:
+        def bytes2int(self, firstbyte, secondbyte):
             value = (firstbyte << 8) + secondbyte
             if(value > 32768):
                 value -= 65536
             return value
 
-    def read_byte_data(self, register):
-        if _MicroPython_:
+    if _MicroPython_:
+        def read_byte_data(self, register):
             high, low = self.bus.readfrom_mem(self.address, register, 2)
             return self.bytes2int(high, low)
-        else:
+    else:
+        def read_byte_data(self, register):
             high, low = self.bus.read_i2c_block_data(self.address, register, 2)
             return self.bytes2int(high, low)
     # -------------------------------------------------------- #
@@ -102,6 +103,7 @@ class MPU6050:
               self.off_gyro, "\n\u001b[33m"+"calibration done."+"\u001b[0m")
 
     def set_M(self, M):
+        # 今はもう使っていない
         print("\u001b[34m"+"start calibrating accelerometer"+"\u001b[0m")
         self.M = M
         self.is_accel_calibrated = True
@@ -111,15 +113,29 @@ class MPU6050:
         temp = self.read_byte_data(self.TEMP_OUT)
         return temp / 340 + 36.53      # data sheet(register map)記載の計算式.
 
+    # def gyro(self):
+    #     """
+    #     物体が，各軸に対して時計回りに回転する角速度
+    #     便宜上符号を変えた
+    #     """
+    #     return (- self.read_byte_data(self.GYRO_XOUT) / 131.0 - self.off_gyro[0],
+    #             - self.read_byte_data(self.GYRO_YOUT) /
+    #             131.0 - self.off_gyro[1],
+    #             - self.read_byte_data(self.GYRO_ZOUT) / 131.0 - self.off_gyro[2])
+
     def gyro(self):
         """
         物体が，各軸に対して時計回りに回転する角速度        
         便宜上符号を変えた
         """
-        return (- self.read_byte_data(self.GYRO_XOUT) / 131.0 - self.off_gyro[0],
-                - self.read_byte_data(self.GYRO_YOUT) /
-                131.0 - self.off_gyro[1],
-                - self.read_byte_data(self.GYRO_ZOUT) / 131.0 - self.off_gyro[2])
+
+        hxl, hxh, hyl, hyh, hzl, hzh = read_byte_data(
+            self.bus, self.address, self.GYRO_XOUT, 6)
+
+        return (- self.bytes2int(hxl, hxh) / 131.0 - self.off_gyro[0],
+                - self.bytes2int(hyl, hyh) / 131.0 - self.off_gyro[1],
+                - self.bytes2int(hzl, hzh) / 131.0 - self.off_gyro[2])
+
     # def accel(self):
     #     if self.is_accel_calibrated:
     #         return Dot(self.M,
@@ -135,6 +151,8 @@ class MPU6050:
     #         ]
 
     def accel(self):
-        return (- self.read_byte_data(self.ACCEL_XOUT) / 16384.0,
-                - self.read_byte_data(self.ACCEL_YOUT) / 16384.0,
-                - self.read_byte_data(self.ACCEL_ZOUT) / 16384.0)
+        hxl, hxh, hyl, hyh, hzl, hzh = read_byte_data(
+            self.bus, self.address, self.ACCEL_XOUT, 6)
+        return (- self.bytes2int(hxl, hxh) / 16384.0,
+                - self.bytes2int(hyl, hyh) / 16384.0,
+                - self.bytes2int(hzl, hzh) / 16384.0)

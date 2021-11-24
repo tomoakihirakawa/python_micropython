@@ -127,6 +127,12 @@ class ServerUDP():
             'buff', kwargs.get('BUFF', kwargs.get('size', 256)))
         self.display = kwargs.get('display', None)
         self.text_to_display = ["", "", "", "", "", ""]
+        #
+        self.monitor_width, self.monitor_height = kwargs.get(
+            'monitor_size', (64, 32))
+        self.activate_process_loop = kwargs.get(
+            'activate_process_loop', True)
+
         # -------------------------------------------------------- #
         # self.clients_list = []
         self.client = None
@@ -188,13 +194,13 @@ class ServerUDP():
         self.process_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         processHP = (self.HOST, self.PORT)
         self.process_server.bind(processHP)
-        # self.process_server.setblocking(True)
+        self.process_server.setblocking(False)
         print('process serverを', processHP, 'にバインド')
         #! ------------------- senderソケット ------------------- #
-        # self.sender_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # senderHP = (self.HOST, self.PORT+1)
-        # self.sender_server.bind(senderHP)
-        # # self.sender_server.setblocking(False)
+        self.sender_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        senderHP = (self.HOST, self.PORT+1)
+        self.sender_server.bind(senderHP)
+        self.sender_server.setblocking(False)
         # print('sender serverを', senderHP, 'にバインド')
         # """
         # senderループは頻繁に実行する同期的プロセスなので，スレッドの実行は派生クラスに委ねる
@@ -203,17 +209,18 @@ class ServerUDP():
         # -------------------------------------------------------- #
         #                  プロセスのリスナーループ                    #
         # -------------------------------------------------------- #
-        print("リスナーループを開始")
-        try:
-            self.thread_process_loop = _thread.start_new_thread(
-                self.process_loop, ())
-            print("process_loopを開始（Micropython）")
-        except:
-            self.thread_process_loop = threading.Thread(
-                target=self.process_loop, args=())
-            self.thread_process_loop.setDaemon(True)
-            self.thread_process_loop.start()
-            print("process_loopを開始")
+        if self.activate_process_loop:
+            print("リスナーループを開始")
+            try:
+                self.thread_process_loop = _thread.start_new_thread(
+                    self.process_loop, ())
+                print("process_loopを開始（Micropython）")
+            except:
+                self.thread_process_loop = threading.Thread(
+                    target=self.process_loop, args=())
+                self.thread_process_loop.setDaemon(True)
+                self.thread_process_loop.start()
+                print("process_loopを開始")
         # -------------------------------------------------------- #
         sleep(0.1)
         # 点滅
@@ -235,13 +242,14 @@ class ServerUDP():
 
     def show(self, scroll=0):
         color = 1
-        width = 64
-        height = 32
+        width = self.monitor_width
+        height = self.monitor_height
         try:
             self.display = self.display if self.display else SSD1306_I2C(
                 width, height, SoftI2C(scl=Pin(22), sda=Pin(21)))
             self.display.fill_rect(
                 0, 0, self.display.width, self.display.height, 0)
+
             for i in range(len(self.text_to_display)):
                 self.display.text(self.text_to_display[i], scroll, 10*i, color)
             self.display.show()
@@ -250,14 +258,12 @@ class ServerUDP():
             print("エラー")
             pass
 
-            # # self.display = self.display if self.display else SSD1306_I2C(
-            # #     128, 64, SoftI2C(scl=Pin(22), sda=Pin(21)))
-            # self.display = self.display if self.display else SSD1306_I2C(
-            #     64, 32, SoftI2C(scl=Pin(22), sda=Pin(21)))
-            # self.display.fill_rect(
-            #     x, y, self.display.width, self.display.height, 0)
-            # self.display.text(text, x, y, color)
-            # self.display.show()
+        # self.display = self.display if self.display else SSD1306_I2C(
+        #     128, 64, SoftI2C(scl=Pin(22), sda=Pin(21)))
+        # self.display.fill_rect(x, y, self.display.width,
+        #                        self.display.height, 0)
+        # self.display.text(text, x, y, color)
+        # self.display.show()
     # -------------------------------------------------------- #
     #                          process                          #
     # -------------------------------------------------------- #
@@ -270,21 +276,21 @@ class ServerUDP():
         except:
             print('invalid json ', jsn, '\n cannot be set')
 
-    def process_loop(self):
+    def process_loop(self, timeout=0):
         """
         基本はポート50001
         """
         jsn = ''
-        i = 0
-        a = 25.
-        for i in range(100000000):
+        r_msg = None
+        client = None
+        while True:
             try:
-                self.display_scroll(round(-a+a*math.cos(2.*math.pi*i/1.5)))
+                if self.monitor_width < 64:
+                    self.display_scroll(round(-a+a*math.cos(2.*math.pi*i/1.5)))
                 # ---------------------------------- #
-                self.process_server.settimeout(1)
-                r_msg, client = self.process_server.recvfrom(self.BUFFSIZE)
+                r_msg, client = self.process_server.recvfrom(128)
                 jsn = decode_bytes(r_msg)
-                print("\u001b[35m", "accessed from ",
+                print("\u001b[35maccessed from ",
                       client, " : ", jsn, "\u001b[0m")
                 self.add_remove_client(client)
                 try:
@@ -374,12 +380,11 @@ class ServerUDP():
         #         self.clients_list.remove(c)
         #     self.clients_list.append(client)
         if not client == self.client:
-            self.client = client
-
             print("\u001b[35m")
             try:
                 print("new client ", self.client)
                 self.sender_server.connect((client[0], client[1]+1))
+                self.client = client
                 print("コネクト成功")
                 # y = 17+10+10+5
                 y = 10+10+10+5
@@ -443,7 +448,7 @@ class MediatorUDP():
         self.receiver_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.receiver_server.bind(self.receiverHP)
         # self.receiver_server.settimeout(0.)と同じ
-        self.receiver_server.setblocking(False)
+        # self.receiver_server.setblocking(True)
 
         # -------------------------------------------------------- #
 
@@ -470,14 +475,17 @@ class MediatorUDP():
             try:
                 self._STATE.update(decode_bytes(
                     self.receiver_server.recv(self.BUFFSIZE)))
-                sleep(self._STATE["period"]*0.6)
             except:
+                sleep(0.001)
                 pass
 
     def __call__(self, key=None):
         if key:
             self.process_server.sendto(jsonToBytes(key), self.processRP)
         return self._STATE
+
+    def get(self, key=None):
+        return self._STATE.get(key)
 
     def monitor(self, t=0.1):
         for i in range(10000):
@@ -644,7 +652,8 @@ try:
             self._FUNCTIONS.update({"accel": self.accel})
             self._FUNCTIONS.update({"start_asymptotic": self.start_asymptotic})
             self._FUNCTIONS.update({"exit_asymptotic": self.exit_asymptotic})
-            self._FUNCTIONS.update({"start_wave": self.start_wave})
+            self._FUNCTIONS.update({"start_sin_wave": self.start_sin_wave})
+            self._FUNCTIONS.update({"start_cos_wave": self.start_cos_wave})
             self._FUNCTIONS.update({"exit_wave": self.exit_wave})
 except:
     pass
@@ -794,36 +803,56 @@ try:
             注意：self._STATEは，すでに親クラスで定義されて，値が入っているので，上書きせず，追記すること
             """
             MPU9250.__init__(self)
-            if _MicroPython_:
-                self.thread_process_loop = _thread.start_new_thread(
-                    self.updater_loop, ())
-            else:
-                self.thread_process_loop = threading.Thread(
-                    target=self.updater_loop, args=())
-                self.thread_process_loop.setDaemon(True)
-                self.thread_process_loop.start()
-
             self._FUNCTIONS.update(
                 {"calibrate_mag": self.AK8963.calibrate,
-                 "calibrate_gyro": self.MPU6050.calibrate_gyro})
+                    "calibrate_gyro": self.MPU6050.calibrate_gyro,
+                    "setOffset": self.AK8963.setOffset,
+                    "setLowPass": self.setLowPass,
+                    "setScale": self.AK8963.setScale})
 
-        def updater_loop(self):
-            P = pacer()
+            self.MAG = (0, 0, 0)
+            self.GYRO = (0, 0, 0)
+            self.ACCEL = (0, 0, 0)
+            self.alpha = 1.
+
             start = time_ns()
+
+            A, M, G = self.AMG()
             while True:
-                print(self._STATE)
+                # print(self._STATE)
                 # P.pace(self._STATE["period"])
+                # self.process(self._STATE["period"])
                 sleep(self._STATE["period"])
                 try:
-                    self._STATE.update({"gyro": self.gyro(),
-                                        "mag": self.mag(),
-                                        "accel": self.accel(),
-                                        "time_ns": time_ns()-start})
-                    self.send()
+                    A, M, G = self.AMG()
+
+                    tmp = (1.-self.alpha)
+                    self.ACCEL = (tmp*self.ACCEL[0] + self.alpha*A[0],
+                                  tmp*self.ACCEL[1] + self.alpha*A[1],
+                                  tmp*self.ACCEL[2] + self.alpha*A[2])
+
+                    self.MAG = (tmp*self.MAG[0] + self.alpha*M[0],
+                                tmp*self.MAG[1] + self.alpha*M[1],
+                                tmp*self.MAG[2] + self.alpha*M[2])
+
+                    self.GYRO = (tmp*self.GYRO[0] + self.alpha*G[0],
+                                 tmp*self.GYRO[1] + self.alpha*G[1],
+                                 tmp*self.GYRO[2] + self.alpha*G[2])
+
+                    self._STATE.update(
+                        {"gyro": self.GYRO, "mag": self.MAG, "accel": self.ACCEL, "time_ns": time_ns()-start})
+                    self.sender_server.send(jsonToBytes(self._STATE))
                 except:
                     print("Sensor read failed!")
-                    sleep(0.01)
+                    print(A, M, G)
+                    print(self.ACCEL, self.MAG, self.GYRO)
+                    print(self._STATE)
+                    sleep(0.2)
                     pass
+
+        def setLowPass(self, a):
+            self.alpha = a
+
 
 except:
     pass

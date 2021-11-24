@@ -1,6 +1,8 @@
 #!/bin/bash
 
 echo "copy alll files to $1"
+echo "ampy -p $1 put ssid_pwd.json"
+ampy -p "$1" put ssid_pwd.json
 echo "ampy -p $1 put openNetwork"
 sudo rm -r openNetwork/__pycache__
 ampy -p "$1" put openNetwork
