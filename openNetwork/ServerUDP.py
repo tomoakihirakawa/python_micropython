@@ -33,12 +33,15 @@ except:
         sleep(t*(10**-6))
 
     def get_ip_address():
-        ip_address = ''
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip_address = s.getsockname()[0]
-        s.close()
-        return ip_address
+        try:
+            ip_address = ''
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip_address = s.getsockname()[0]
+            s.close()
+            return ip_address
+        except:
+            print('ネットワークに繋がっていないのでは？')
 
     _MicroPython_ = False
 
@@ -357,17 +360,12 @@ class ServerUDP():
                                 "t_tot": P.total_time*10**-9})
 
     def send(self):
-        try:
+        if self.led:
             self.led.on()
-        except:
-            pass
-
-        self.sender_server.send(jsonToBytes(self._STATE))
-
-        try:
+            self.sender_server.send(jsonToBytes(self._STATE))
             self.led.off()
-        except:
-            pass
+        else:
+            self.sender_server.send(jsonToBytes(self._STATE))
 
     # -------------------------------------------------------- #
 

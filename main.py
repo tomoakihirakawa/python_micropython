@@ -5,8 +5,8 @@ try:
     from openNetwork import *
     try:
         from machine import Pin
-        # led = Pin(19, Pin.OUT)
-        # led.off()
+        led = Pin(19, Pin.OUT)
+        led.off()
     except:
         pass
     # DummySensorServer()

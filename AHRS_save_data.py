@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 from openNetwork import *
 from math import pi, sin
@@ -20,19 +19,8 @@ red = "\033[31m"
 blue = "\033[34m"
 default = "\033[39m"
 
-
-def NormalizeTuple(mag):
-    norm = Norm(mag)
-    return (mag[0]/norm, mag[1]/norm, mag[2]/norm)
-
-
-def NormalizeList(mag):
-    norm = Norm(mag)
-    return [mag[0]/norm, mag[1]/norm, mag[2]/norm]
-
-
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="10.0.1.5")
+m = MediatorUDP(remote="192.168.1.40")
 m({"set": {"period": 0.02}})
 m({"setLowPass": 0.5})
 # -------------------------------------------------------- #
