@@ -66,7 +66,7 @@ class servomotor:
         time.sleep(1)
 
 
-def example():
+def servomotor_example():
     s = servomotor(0, 0)
     min = 40
     max = 140
@@ -84,7 +84,7 @@ def example():
                 break
 
 
-def example2():
+def servomotor_example2():
     s = [servomotor(0, 0), servomotor(1, 0), servomotor(2, 0)]
     min = 30.
     max = 130.
@@ -117,7 +117,7 @@ def example2():
         angles.reverse()
 
 
-def example3():
+def servomotor_example3():
     s = [servomotor(0, 0), servomotor(1, 0), servomotor(2, 0)]
     min = 30.
     max = 160.
