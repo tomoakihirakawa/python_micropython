@@ -1,0 +1,6 @@
+__pycache__
+cmake*
+test*
+CMake*
+.vscode*
+./.*
