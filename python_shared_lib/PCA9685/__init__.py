@@ -1,4 +1,4 @@
-from PCA9685.PCA9685 import PCA9685
+from .PCA9685 import PCA9685
 
 print("\u001b[35m")
 print("PCA9685 is imported")

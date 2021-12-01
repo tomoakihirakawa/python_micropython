@@ -20,12 +20,12 @@ except:
         print('please install smbus')
         print("\u001b[0m")
 
-from libi2c import *
+from ..libi2c import *
 
 #@ -------------------------------------------------------- #
 #@                          PCA9685                         #
 #@ -------------------------------------------------------- #
-#@ Adafruitのライブラリをmicropythonとラズパイの両方で使えるように修正した
+# @ Adafruitのライブラリをmicropythonとラズパイの両方で使えるように修正した
 
 # Registers/etc:
 PCA9685_ADDRESS = 0x40
@@ -51,6 +51,7 @@ ALLCALL = 0x01
 INVRT = 0x10
 OUTDRV = 0x04
 
+
 class PCA9685:
     """PCA9685 PWM LED/servo controller."""
 
@@ -63,7 +64,7 @@ class PCA9685:
                 self.bus = i2c
             else:
                 self.bus = I2C(scl=Pin(22), sda=Pin(21))
-                print('self.bus.scan()  ', self.bus.scan() )
+                print('self.bus.scan()  ', self.bus.scan())
         else:
             self.bus = smbus.SMBus(1)
 
@@ -71,7 +72,7 @@ class PCA9685:
         write_byte_data(self.bus, self.address, MODE2, OUTDRV)
         write_byte_data(self.bus, self.address, MODE1, ALLCALL)
         time.sleep(0.005)  # wait for oscillator
-        mode1, = read_byte_data(self.bus,self.address,MODE1,1)
+        mode1, = read_byte_data(self.bus, self.address, MODE1, 1)
         mode1 = mode1 & 0xFF
         mode1 = mode1 & ~SLEEP  # wake up (reset sleep)
         write_byte_data(self.bus, self.address, MODE1, mode1)
@@ -84,7 +85,7 @@ class PCA9685:
         prescaleval /= float(freq_hz)
         prescaleval -= 1.0
         prescale = round(prescaleval)
-        oldmode, = read_byte_data(self.bus,self.address,MODE1,1)
+        oldmode, = read_byte_data(self.bus, self.address, MODE1, 1)
         oldmode = oldmode & 0xFF
         newmode = (oldmode & 0x7F) | 0x10    # sleep
         write_byte_data(self.bus, self.address, MODE1, newmode)  # go to sleep
@@ -97,9 +98,10 @@ class PCA9685:
         """Sets a single PWM channel."""
         write_byte_data(self.bus, self.address, LED0_ON_L+4*channel, on & 0xFF)
         write_byte_data(self.bus, self.address, LED0_ON_H+4*channel, on >> 8)
-        write_byte_data(self.bus, self.address, LED0_OFF_L+4*channel, off & 0xFF)
+        write_byte_data(self.bus, self.address,
+                        LED0_OFF_L+4*channel, off & 0xFF)
         write_byte_data(self.bus, self.address, LED0_OFF_H+4*channel, off >> 8)
-        
+
     def set_all_pwm(self, on, off):
         """Sets all PWM channels."""
         write_byte_data(self.bus, self.address, ALL_LED_ON_L, on & 0xFF)
@@ -109,43 +111,47 @@ class PCA9685:
 
 # -------------------------------------------------------- #
 
-def example():        
-    
-    def Subdivide(min,max,num):
+
+def example():
+
+    def Subdivide(min, max, num):
         return [min+i*(max-min)/(num-1) for i in range(num)]
 
     class servomotor:
         """
         MG996Rの場合，
         0.4ms
-        """    
+        """
 
-        min_len_deg = [0.0005,0]
-        max_len_deg = [0.0025,180]
-        
+        min_len_deg = [0.0005, 0]
+        max_len_deg = [0.0025, 180]
+
         def __init__(self, ch_IN, offset_IN=0):
             self.ch = ch_IN
-            self.offset = offset_IN        
+            self.offset = offset_IN
             self.pwm = PCA9685(address=0x40)
             self.freq = 50.
             self.pwm.set_pwm_freq(50.)
 
-            self.min_pulse = self.min_len_deg[0]/((1./self.freq)/(2.**12))#0 deg
-            self.max_pulse = self.max_len_deg[0]/((1./self.freq)/(2.**12))#180deg
+            self.min_pulse = self.min_len_deg[0] / \
+                ((1./self.freq)/(2.**12))  # 0 deg
+            self.max_pulse = self.max_len_deg[0] / \
+                ((1./self.freq)/(2.**12))  # 180deg
             self.pulse_range = self.max_pulse - self.min_pulse
-            
+
         # def setPWM(self, p):
         #     self.pwm.set_pwm(self.ch, 0, int((650.-150.)*p/180.+150+self.offset))
-            
+
         def setDegree(self, deg):
             #!roundを使うべき
-            self.pwm.set_pwm(self.ch, 0, round(self.min_pulse + self.pulse_range*(deg/180.)))
+            self.pwm.set_pwm(self.ch, 0, round(
+                self.min_pulse + self.pulse_range*(deg/180.)))
 
         def setDegreeByTime(self, min, max, elapsedtime, step=300):
             start = time.time()
-            angles = Subdivide(min,max,step)
-            times = Subdivide(0,elapsedtime,step)#sec
-            for a, t in zip(angles,times):
+            angles = Subdivide(min, max, step)
+            times = Subdivide(0, elapsedtime, step)  # sec
+            for a, t in zip(angles, times):
                 while True:
                     if time.time() - start >= t:
                         self.setDegree(a)
@@ -160,7 +166,7 @@ def example():
 
     # -------------------------------------------------------- #
 
-    s = servomotor(0,0)
+    s = servomotor(0, 0)
     min = 0
     max = 180
 
@@ -172,12 +178,12 @@ def example():
     else:
         start = time.time()
 
-    angles = Subdivide(min,max,1000)
-    times = Subdivide(0,10,1000)#sec
-    for a, t in zip(angles,times):
+    angles = Subdivide(min, max, 1000)
+    times = Subdivide(0, 10, 1000)  # sec
+    for a, t in zip(angles, times):
         while True:
             if _MicroPython_:
-                dt = (time.time_ns() - start ) *10**-9
+                dt = (time.time_ns() - start) * 10**-9
             else:
                 dt = time.time() - start
             if dt >= t:
@@ -185,6 +191,6 @@ def example():
                 s.setDegree(a)
                 break
 
+
 if __name__ == '__main__':
     example()
-    

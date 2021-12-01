@@ -16,7 +16,7 @@ try:
     # @ 独自のネットワーク接続用ライブラリ
     from .accessPoint import *
     try:
-        from display import *
+        from ..display import *
     except:
         pass
     _MicroPython_ = True
@@ -157,6 +157,7 @@ class ServerUDP():
                     inputfile.close()
                     for i in range(10):
                         for ssid, pwd in ssid_pwd.items():
+                            print("ssid", ssid)
                             if not ap:
                                 self.ssid = ssid
                                 self.password = pwd
@@ -640,7 +641,7 @@ try:
     """
     ステッパーモーターを使った例
     """
-    from steppermotor import *
+    from ..steppermotor import *
 
     class DummyStepperMotorServer(steppermotor, ServerUDP):
         def __init__(self, **kwargs):
@@ -670,7 +671,7 @@ try:
     サーボモーターを使った例
     このパッケージを読み込むディレクトリにservomotorがある必要がある場合読み込まれる
     """
-    from servomotor import *
+    from ..servomotor import *
 
     class DummyServoMotorServer(ServerUDP):
         def repeateMoveAll(self, tup):
@@ -732,7 +733,7 @@ try:
     圧力センサーを使った例
     このパッケージを読み込むディレクトリにservomotorがある必要がある場合読み込まれる
     """
-    from pressureSensors import MS5837_30BA
+    from ..pressureSensors import MS5837_30BA
 
     class PressureSensor(MS5837_30BA):
         def __init__(self, **kwargs):
@@ -791,7 +792,7 @@ try:
     +------+
     """
 
-    from AHRS import *
+    from ..AHRS import *
 
     class DummyMPUServer(MPU9250, ServerUDP):
 

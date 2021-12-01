@@ -11,13 +11,13 @@ _default_color_ = "\u001b[0m"
 
 
 try:
-    from pressureSensors.MS5837 import MS5837_02BA
+    from .MS5837 import MS5837_02BA
     print(_green_+" * pressureSensors.MS5837.MS5837_02BA"+_default_color_)
 except:
     print(_red_+" x pressureSensors.MS5837"+_default_color_)
 
 try:
-    from pressureSensors.MS5837 import MS5837_30BA
+    from .MS5837 import MS5837_30BA
     print(_green_+" * pressureSensors.MS5837.MS5837_30BA"+_default_color_)
 except:
     print(_red_+" x pressureSensors.MS5837"+_default_color_)

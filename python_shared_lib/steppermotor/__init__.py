@@ -1,4 +1,4 @@
-from steppermotor.steppermotor import steppermotor
+from .steppermotor import steppermotor
 # これによってservomoter.servomoterとしてservomoter.servomoterがつかえるようになる
 print("\u001b[35m")
 print("steppermotor is imported")

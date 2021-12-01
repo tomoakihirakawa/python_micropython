@@ -6,7 +6,7 @@ try:
 except:
     import time
 
-from PCA9685 import PCA9685
+from ..PCA9685 import PCA9685
 
 
 def Subdivide(min, max, num):
@@ -40,7 +40,7 @@ class servomotor:
     def setDegree(self, deg):
         #!roundを使うべき
         self.pwm.set_pwm(self.ch, 0, round(self.min_pulse +
-                         self.pulse_range*((deg-self.offset)/180.)))
+                                           self.pulse_range*((deg-self.offset)/180.)))
 
     def setDegreeByTime(self, min, max, elapsedtime, step=300):
         start = time.time()

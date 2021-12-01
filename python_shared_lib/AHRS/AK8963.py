@@ -20,7 +20,7 @@ except:
         print('please install smbus')
         print("\u001b[0m")
 
-from libi2c import *
+from ..libi2c import *
 # -------------------------------------------------------- #
 
 import time
@@ -97,7 +97,7 @@ class AK8963:
 
     def calibrate(self, time_span):
         print("\u001b[33m"+"calibrating, time = " +
-              str(time_span) + "\u001b[0m") 
+              str(time_span) + "\u001b[0m")
         s = time.time()
         M = [0, 0, 0]
         minmaxM = [[10**10, -10**10], [10**10, -10**10], [10**10, -10**10]]

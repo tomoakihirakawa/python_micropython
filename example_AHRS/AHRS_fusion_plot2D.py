@@ -1,6 +1,6 @@
 
 import matplotlib.pyplot as plt
-from openNetwork import *
+from python_shared_lib.openNetwork import *
 from math import pi, sin
 from statistics import mean
 import json
@@ -70,35 +70,33 @@ while True:
         sleep(1.)
         pass
 
-    if count > 500:
+    if count > 100:
         break
 
-fusion = Fusion(Times(6, A), M)  # %fusion作成
+fusion = Fusion(A, M)  # %fusion作成
 
 #b% -------------------------------------------------------- #
 
 start = time_ns()
-# -------------------------------------------------------- #
 IA = integratorMultiple(3)
-# -------------------------------------------------------- #
+
+#* -------------------------------------------------------- #
+#*                           図の設定                        #
+#* -------------------------------------------------------- #
 fig = plt.figure()
-ax0 = fig.add_subplot(311)
-X = [0]
-Y0 = [0]
-Yapprox0 = [0]
-li0, = ax0.plot(X, Y0, '-')
-liApprox0, = ax0.plot(X, Yapprox0, '-')
-ax1 = fig.add_subplot(312)
-Y1 = [0]
-li1, = ax1.plot(X, Y1, '-')
-ax2 = fig.add_subplot(313)
-Y2 = [0]
-li2, = ax2.plot(X, Y2, '-')
-
+ax = fig.add_subplot(111)
+X = []
+Y0 = []
+Y1 = []
+Y2 = []
+lines = [ax.plot(X, Y0, '-', label="x")[0],
+         ax.plot(X, Y1, '-', label="y")[0],
+         ax.plot(X, Y2, '-', label="z")[0]]
+ax.set_xlabel('time (s)')
+ax.set_ylabel('sensor value')
 fig.canvas.draw()
+plt.legend()
 plt.show(block=False)
-
-
 #b@ -------------------- ジャイロセンサーの校正で確認 -------------------- #
 bias_gyro = (-0.07128319964117816,
              0.12235516538683028,
@@ -122,17 +120,24 @@ for i in range(10000):
             T_ns_ = T_ns
             current_time = (time_ns()-start)*10**-9
             # accel = data["accel"]
-            accel = Times(6, data["accel"])
+            accel = data["accel"]
             mag = Subtract(data.get("mag"), bias_mag)
             gyro = Subtract(data.get("gyro"), bias_gyro)
             print("dt = ", current_time-current_time_)
             current_time_ = current_time
             # -------------------------------------------------------- #
-            Q = fusion.solveForQuaternion(
+            # Q = fusion.solveForQuaternion(
+            #     accel,
+            #     mag,
+            #     gyro,
+            #     current_time)
+
+            Q = fusion.updateStandard(
                 accel,
                 mag,
                 gyro,
-                current_time)
+                current_time,
+                0.9)
             if i > 5:
                 # gG = Q.Rs(gravity)
                 # a_ = [accel[0] - gG[0], accel[1] - gG[1], accel[2] - gG[2]]
@@ -142,27 +147,19 @@ for i in range(10000):
                 IA.add(current_time, a_)
                 # a_ = IA.integral
                 # -------------------------------------------------------- #
-                # -------------------------------------------------------- #
                 X.append(current_time)
                 # Yapprox0.append(fusion.interpAbody(current_time)[0])
-
-                Y0.append(a_[0])
                 # liApprox0.set_data(X, Yapprox0)
-                li0.set_data(X, Y0)
-                ax0.relim()
-                ax0.autoscale_view(True, True, True)
                 # Y.append(IA.integral[1])
-                # ------------------------------------------ #
+                Y0.append(a_[0])
                 Y1.append(a_[1])
-                li1.set_data(X, Y1)
-                ax1.relim()
-                ax1.autoscale_view(True, True, True)
-                # -------------------------------------------------------- #
                 Y2.append(a_[2])
-                li2.set_data(X, Y2)
-                ax2.relim()
-                ax2.autoscale_view(True, True, True)
                 # -------------------------------------------------------- #
+                lines[0].set_data(X, Y0)
+                lines[1].set_data(X, Y1)
+                lines[2].set_data(X, Y2)
+                ax.relim()
+                ax.autoscale()
                 fig.canvas.draw()
                 plt.pause(0.0001)
 

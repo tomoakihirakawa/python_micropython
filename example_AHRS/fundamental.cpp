@@ -57,7 +57,6 @@ PYBIND11_MODULE(fundamental, m)
 		  { return U / d; });
 	m.def("Divide", [](const Tddd &V, const Tddd &U)
 		  { return V / U; });
-	//
 	m.def("Divide", [](const VV_d &U, const double d)
 		  { return U / d; });
 	m.def("Divide", [](const V_d &U, const double d)
@@ -129,7 +128,6 @@ PYBIND11_MODULE(fundamental, m)
 		  { return Transpose(M); });
 	m.def("RandomReal", [](const V_d &minmax)
 		  { return RandomReal(minmax); });
-	/* ------------------------------------------------------ */
 	/* ------------------------------------------------------ */
 	pybind11::class_<geometry::Triangle>(m, "Triangle")
 		.def(pybind11::init<const T3Tddd &, double>());

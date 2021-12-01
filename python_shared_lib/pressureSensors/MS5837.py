@@ -21,7 +21,7 @@ except:
         print('please install smbus')
         print("\u001b[0m")
 
-from libi2c import *
+from ..libi2c import *
 
 # Models
 MODEL_02BA = 0
