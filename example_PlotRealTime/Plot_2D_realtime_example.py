@@ -1,17 +1,20 @@
 from time import time, sleep
+import matplotlib.pyplot as plt
 from math import pi, sin
 from time import time, sleep, time_ns
 import numpy as np
-from matplotlib.gridspec import GridSpec
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.colors import Normalize
 import matplotlib
 from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
-
+red = "\033[31m"
+blue = "\033[34m"
+default = "\033[39m"
+# -------------------------------------------------------- #
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set(xlabel='time [s]', ylabel='pressure [Pa]')
+# -------------------------------------------------------- #
+period = 0.07
 
 P0 = []
 P1 = []
@@ -46,7 +49,7 @@ Ts = [T0, T1, T2, T3, T4, T5, T6]
 
 start = time_ns()
 count = 0
-period = 0.01
+# -------------------------------------------------------- #
 while count < 5000:
     count += 1
     sleep(period)
@@ -56,7 +59,7 @@ while count < 5000:
         current_time = (time_ns()-start)*10**-9
         data = {"depth": sin(current_time)}
         print(data)
-        for i in range(7):
+        for i in range(len(lines)):
             Ps[i].append(data["depth"]*i)
             Ts[i].append(current_time)
             lines[i].set_ydata(Ps[i])
