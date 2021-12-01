@@ -1,18 +1,9 @@
 from time import time, sleep
 import matplotlib.pyplot as plt
-from openNetwork import *
+from python_shared_lib.openNetwork import *
 from math import pi, sin
-from statistics import mean
-import json
-from integrator import *
-from fundamental import *
 from time import time, sleep, time_ns
-# from fusion import *
-# from AHRS import *
 import numpy as np
-from matplotlib.gridspec import GridSpec
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.colors import Normalize
 import matplotlib
 from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
