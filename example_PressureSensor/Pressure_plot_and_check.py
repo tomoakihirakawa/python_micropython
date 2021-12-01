@@ -12,17 +12,34 @@ blue = "\033[34m"
 default = "\033[39m"
 
 # -------------------------------------------------------- #
-
-# sensors = [MediatorUDP(remote="192.168.0.115", port=50000),
-#            MediatorUDP(remote="192.168.0.102", port=51000),
-#            MediatorUDP(remote="192.168.0.103", port=52000)]
-
-# sleep(1.)
-period = 0.07
-# for i in range(len(sensors)):
-#     sensors[i]({"set": {"period": period}})
-# sleep(1.)
+#                     リモート計測機の設定                    #
 # -------------------------------------------------------- #
+remote_addr = ["192.168.0.115",
+               "192.168.0.115",
+               "192.168.0.115",
+               "192.168.0.115",
+               "192.168.0.115",
+               "192.168.0.115"]
+
+sensors = [MediatorUDP(remote=remote_addr[0], port=50000),
+           MediatorUDP(remote=remote_addr[1], port=51000),
+           MediatorUDP(remote=remote_addr[2], port=52000),
+           MediatorUDP(remote=remote_addr[3], port=53000),
+           MediatorUDP(remote=remote_addr[4], port=54000),
+           MediatorUDP(remote=remote_addr[5], port=55000),
+           MediatorUDP(remote=remote_addr[6], port=56000)]
+
+sleep(1.)
+
+period = 0.07
+for i in range(len(sensors)):
+    sensors[i]({"set": {"period": period}})
+sleep(1.)
+
+# -------------------------------------------------------- #
+#                           図の準備                         #
+# -------------------------------------------------------- #
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set(xlabel='time [s]', ylabel='pressure [Pa]')
@@ -60,6 +77,11 @@ Ts = [T0, T1, T2, T3, T4, T5, T6]
 
 start = time_ns()
 count = 0
+
+# -------------------------------------------------------- #
+#                        計測とプロット                       #
+# -------------------------------------------------------- #
+
 while count < 5000:
     count += 1
     sleep(period)
