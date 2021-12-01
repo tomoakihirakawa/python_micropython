@@ -9,22 +9,12 @@ matplotlib.rcParams['font.family'] = 'Times New Roman'
 red = "\033[31m"
 blue = "\033[34m"
 default = "\033[39m"
-
-# -------------------------------------------------------- #
-
-# sensors = [MediatorUDP(remote="192.168.0.115", port=50000),
-#            MediatorUDP(remote="192.168.0.102", port=51000),
-#            MediatorUDP(remote="192.168.0.103", port=52000)]
-
-# sleep(1.)
-period = 0.07
-# for i in range(len(sensors)):
-#     sensors[i]({"set": {"period": period}})
-# sleep(1.)
 # -------------------------------------------------------- #
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.set(xlabel='time [s]', ylabel='pressure [Pa]')
+# -------------------------------------------------------- #
+period = 0.07
 
 P0 = []
 P1 = []
@@ -59,6 +49,7 @@ Ts = [T0, T1, T2, T3, T4, T5, T6]
 
 start = time_ns()
 count = 0
+# -------------------------------------------------------- #
 while count < 5000:
     count += 1
     sleep(period)
