@@ -5,3 +5,4 @@ CMake*
 .vscode*
 ./.*
 .DS*
+.gitignore
