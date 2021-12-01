@@ -4,7 +4,7 @@ try:
     from machine import SoftI2C as I2C, Pin
     import utime as time
     from time import sleep, sleep_us
-    
+
     _MicroPython_ = True
 except:
     # ラズパイの場合
@@ -56,11 +56,12 @@ UNITS_Kelvin = 3
 
 # -------------------------------------------------------- #
 
+
 class MS5837:
 
     # Registers
     _MS5837_ADDR = 0x76
-    # 
+    #
     _MS5837_RESET = 0x1E
     _MS5837_ADC_READ = 0x00
     _MS5837_PROM_READ = 0xA0
@@ -69,26 +70,26 @@ class MS5837:
 
     def __init__(self, model=MODEL_30BA, **kwargs):
 
-        self.bus=kwargs.get('bus', None)        
+        self.bus = kwargs.get('bus', None)
 
         self._model = model
-        
-        if not self.bus:        
+
+        if not self.bus:
             if _MicroPython_:
-                self.bus = I2C(scl=Pin(kwargs.get('scl', 22)), sda=Pin(kwargs.get('sda', 21)))
+                self.bus = I2C(scl=Pin(kwargs.get('scl', 22)),
+                               sda=Pin(kwargs.get('sda', 21)))
                 print('MS5837 for micropython')
-                print('self.bus.scan()  ', self.bus.scan() )
+                print('self.bus.scan()  ', self.bus.scan())
             else:
                 self.bus = smbus.SMBus(kwargs.get('busnum', 1))
-
 
         self._fluidDensity = DENSITY_FRESHWATER
         self._pressure = 0
         self._temperature = 0
         self._D1 = 0
         self._D2 = 0
-        
-        self.init();
+
+        self.init()
 
     def bytes2int(self, firstbyte, secondbyte):
         if _MicroPython_:
@@ -109,24 +110,25 @@ class MS5837:
 
         # print(b"{}".format(self._MS5837_RESET))
         # self.bus.writeto(self._MS5837_ADDR, b"{}".format(self._MS5837_RESET))
-        write_byte(self.bus,self._MS5837_ADDR, self._MS5837_RESET)
-        
+        write_byte(self.bus, self._MS5837_ADDR, self._MS5837_RESET)
+
         # Wait for reset to complete
         sleep(0.05)
 
         self._C = []
         # Read calibration values and CRC
         for i in range(7):
-            c = read_byte_data(self.bus, self._MS5837_ADDR, self._MS5837_PROM_READ + 2*i, 2)
+            c = read_byte_data(self.bus, self._MS5837_ADDR,
+                               self._MS5837_PROM_READ + 2*i, 2)
             value = (c[0] << 8) + c[1]
             self._C.append(value)
-        
+
         print(self._C)
-        
+
         crc = (self._C[0] & 0xF000) >> 12
         if crc != self._crc4(self._C):
-            #PROM: Programmable Read-Only Memory
-            #CRC: cyclic redundancy check
+            # PROM: Programmable Read-Only Memory
+            # CRC: cyclic redundancy check
             print("PROM read error, CRC failed!")
             return False
 
@@ -143,7 +145,8 @@ class MS5837:
 
         # Request D1 conversion (pressure)
         # self.bus.write_byte(self._MS5837_ADDR, self._MS5837_CONVERT_D1_256 + 2*oversampling)
-        write_byte(self.bus,self._MS5837_ADDR, self._MS5837_CONVERT_D1_256 + 2*oversampling)
+        write_byte(self.bus, self._MS5837_ADDR,
+                   self._MS5837_CONVERT_D1_256 + 2*oversampling)
 
         # Maximum conversion time increases linearly with oversampling
         # max time (seconds) ~= 2.2e-6(x) where x = OSR = (2^8, 2^9, ..., 2^13)
@@ -153,23 +156,25 @@ class MS5837:
 
         # d = self.bus.read_i2c_block_data(
         #     self._MS5837_ADDR, self._MS5837_ADC_READ, 3)
-        
-        d = read_byte_data(self.bus,self._MS5837_ADDR, self._MS5837_ADC_READ, 3)
-        
+
+        d = read_byte_data(self.bus, self._MS5837_ADDR,
+                           self._MS5837_ADC_READ, 3)
+
         self._D1 = d[0] << 16 | d[1] << 8 | d[2]
 
         # Request D2 conversion (temperature)
         # self.bus.write_byte(self._MS5837_ADDR, self._MS5837_CONVERT_D2_256 + 2*oversampling)
 
-        write_byte(self.bus,self._MS5837_ADDR, self._MS5837_CONVERT_D2_256 + 2*oversampling)
+        write_byte(self.bus, self._MS5837_ADDR,
+                   self._MS5837_CONVERT_D2_256 + 2*oversampling)
 
         # As above
         # sleep(2.5e-6 * 2**(8+oversampling))
         sleep_us(round(10**6*(2.5e-6 * 2**(8+oversampling))))
 
-
         # d = self.bus.read_i2c_block_data(self._MS5837_ADDR, self._MS5837_ADC_READ, 3)
-        d = read_byte_data(self.bus,self._MS5837_ADDR, self._MS5837_ADC_READ, 3)
+        d = read_byte_data(self.bus, self._MS5837_ADDR,
+                           self._MS5837_ADC_READ, 3)
         self._D2 = d[0] << 16 | d[1] << 8 | d[2]
 
         # Calculate compensated pressure and temperature
@@ -184,7 +189,7 @@ class MS5837:
     # Pressure in requested units
     # mbar * conversion
     def pressure(self, conversion=UNITS_kPa):
-        #UNITS_mbar
+        # UNITS_mbar
         return self._pressure * conversion
 
     # Temperature in requested units
@@ -223,7 +228,7 @@ class MS5837:
 
         # 以前のもの
         self._temperature = 2000+dT*self._C[6]/8388608
-        
+
         # beta = 0.9
         # tmp = (2000+dT*self._C[6]/8388608)
         # self._temperature = self._temperature*0.5 + tmp*0.5
@@ -289,23 +294,21 @@ class MS5837:
 
 if _MicroPython_:
     class MS5837_30BA(MS5837):
-        def __init__(self,**kwargs):
-            MS5837.__init__(self, MODEL_30BA, **kwargs)
-
-    class MS5837_02BA(MS5837):
-        def __init__(self,**kwargs):
-            MS5837.__init__(self, MODEL_02BA,**kwargs)   
-           
-else:
-    class MS5837_30BA(MS5837):
         def __init__(self, **kwargs):
             MS5837.__init__(self, MODEL_30BA, **kwargs)
-
 
     class MS5837_02BA(MS5837):
         def __init__(self, **kwargs):
             MS5837.__init__(self, MODEL_02BA, **kwargs)
 
+else:
+    class MS5837_30BA(MS5837):
+        def __init__(self, **kwargs):
+            MS5837.__init__(self, MODEL_30BA, **kwargs)
+
+    class MS5837_02BA(MS5837):
+        def __init__(self, **kwargs):
+            MS5837.__init__(self, MODEL_02BA, **kwargs)
 
 
 def example():
@@ -322,31 +325,34 @@ def example():
 def example2():
     s = MS5837_30BA()
     s.read()
-    p = s.depth()    
+    p = s.depth()
     beta = 0.8
     for t in range(10000):
         sleep(.01)
-        if s.read():            
+        if s.read():
             p = p*beta + s.depth()*(1-beta)
             print("P: %0.4f m\tT: %0.2f" % (p, s.temperature()))
         else:
             print("Sensor read failed!")
             exit(1)
 
+
 def example3():
     s = MS5837_30BA()
     s.read()
-    p = s.depth()    
+    p = s.depth()
     beta = 0.7
-    ar =["*"]
+    ar = ["*"]
     for t in range(10000):
         sleep(.05)
-        if s.read():            
+        if s.read():
             p = p*beta + s.depth()*(1-beta)
-            print(("\u001b[3"+str(int(100*p))+"m"+"P:%0.5f, %s m\u001b[0m,  T: %0.5f") % (p,' '.join(int(p*1000)*ar).replace(" ",""), s.temperature()))
+            print(("\u001b[3"+str(int(100*p))+"m"+"P:%0.5f, %s m\u001b[0m,  T: %0.5f") %
+                  (p, ' '.join(int(p*1000)*ar).replace(" ", ""), s.temperature()))
         else:
             print("Sensor read failed!")
             exit(1)
+
 
 if __name__ == '__main__':
     example3()
