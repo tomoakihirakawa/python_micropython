@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from openNetwork import *
+from python_shared_lib.openNetwork import *
 from math import pi, sin
 from statistics import mean
 import json
@@ -15,33 +15,45 @@ from matplotlib.colors import Normalize
 import matplotlib
 from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
-red = "\033[31m"
-blue = "\033[34m"
-default = "\033[39m"
-
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="192.168.1.40")
-m({"set": {"period": 0.02}})
+m = MediatorUDP(remote="10.0.1.5")
+m({"set": {"period": 0.01}})
 m({"setLowPass": 0.5})
 # -------------------------------------------------------- #
 
+minmax_mag = [[100, -100], [100, -100], [100, -100]]
+
+
+def update_minmax_mag(mag):
+    global minmax_mag
+    for i in range(3):
+        if mag[i] < minmax_mag[i][0]:
+            minmax_mag[i][0] = mag[i]
+        if mag[i] > minmax_mag[i][1]:
+            minmax_mag[i][1] = mag[i]
+
+
+# -------------------------------------------------------- #
 t_ns = 0
 t_ns_last = 0
 data = []
 count = 0
 while True:
-    sleep(0.03)
+    sleep(0.01)
     try:
         t_ns = m.get("time_ns")
-        print(m.get("mag"))
         if t_ns and t_ns is not t_ns_last:
             # print(count)
             t_ns_last = t_ns
             data.append(m().copy())
+            # 中心の計算
+            mag = m.get("mag")
+            update_minmax_mag(mag)
+            print(count, "minmax_mag = ", minmax_mag)
             count = count + 1
     except:
         pass
-    if count > 10000:
+    if count > 500:
         break
 
 f = open("./dataAHRS.json", "w")

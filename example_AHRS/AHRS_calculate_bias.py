@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from openNetwork import *
+from python_shared_lib.openNetwork import *
 from math import pi, sin
 from statistics import mean
 import json
@@ -15,29 +15,14 @@ from matplotlib.colors import Normalize
 import matplotlib
 from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
-red = "\033[31m"
-blue = "\033[34m"
-default = "\033[39m"
-
-
-def NormalizeTuple(mag):
-    norm = Norm(mag)
-    return (mag[0]/norm, mag[1]/norm, mag[2]/norm)
-
-
-def NormalizeList(mag):
-    norm = Norm(mag)
-    return [mag[0]/norm, mag[1]/norm, mag[2]/norm]
-
 
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="192.168.1.40")
+m = MediatorUDP(remote="10.0.1.5")
 m({"set": {"period": 0.02}})
 m({"setLowPass": 0.5})
 # -------------------------------------------------------- #
 start = time_ns()
 bias = [0, 0, 0]
-
 
 minmax_mag = [[100, -100], [100, -100], [100, -100]]
 
@@ -63,14 +48,14 @@ for i in range(1000):
         update_minmax_mag(mag)
         gyro = m.get("gyro")
         current_time = (time_ns()-start)*10**-9
-        X3d.append(gyro[0])
-        Y3d.append(gyro[1])
-        Z3d.append(gyro[2])
-        data = mag  # @ データを選択
+        X3d.append(mag[0])
+        Y3d.append(mag[1])
+        Z3d.append(mag[2])
+        data = gyro  # @ データを選択
         bias = [0.1*bias[0]+0.9*data[0],
                 0.1*bias[1]+0.9*data[1],
                 0.1*bias[2]+0.9*data[2]]
-        print("bias= ", minmax_mag)
+        print("mag=", mag, "minmax= ", minmax_mag, "data", data, "gyro", gyro)
     except:
         print("error")
         pass
