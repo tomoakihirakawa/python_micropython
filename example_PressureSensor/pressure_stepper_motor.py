@@ -85,7 +85,7 @@ while count < 5000:
     try:
         current_time = (time_ns()-start)*10**-9
         for i in range(len(lines)):
-            Ps[i].append(data.sensors[i].get("depth"))
+            Ps[i].append(sensors[i].get("depth"))
             Ts[i].append(current_time)
             lines[i].set_ydata(Ps[i])
             lines[i].set_xdata(Ts[i])
