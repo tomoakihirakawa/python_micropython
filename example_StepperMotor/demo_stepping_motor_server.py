@@ -1,6 +1,6 @@
 from math import pi, sin
-from openNetwork import *
-m = MediatorUDP(remote="10.0.1.10")
+from python_shared_lib.openNetwork import *
+m = MediatorUDP(remote="192.168.0.109")
 
 # -------------------------------------------------------- #
 #                            設定                          #
