@@ -13,14 +13,12 @@ except:
 どのモードでも，およそ７回転/秒が最大速度．
 その半分の速度の場合，かなり安定して動かすことができると思われるので，基本の回転速度を最大速度の約半分に設定する．
 
-=======================================================================================
-|     |      |       max freq 12V      |                                              |
-|=====================================================================================|
-|  1  |  200 |  ~  1500 (Hz)=(step/s)  | ~  1500(step/s)/200(step/rot)  = 7.5(rot/s)  |
-|  4  |  800 |  ~  6000 (Hz)=(step/s)  | ~  6000(step/s)/800(step/rot)  = 7.5(rot/s)  |
-|  8  | 1600 |  ~ 12000 (Hz)=(step/s)  | ~ 12000(step/s)/1600(step/rot) = 7.5(rot/s)  |
-| 16  | 3200 |  ~ 24000 (Hz)=(step/s)  | ~ 24000(step/s)/1600(step/rot) = 7.5(rot/s)  |
-=======================================================================================
+|     |      | max freq for 12V      |                                             |
+| --- | ---- | --------------------- | ------------------------------------------- |
+| 1   | 200  | ~  1500 (Hz)=(step/s) | ~  1500(step/s)/200(step/rot)  = 7.5(rot/s) |
+| 4   | 800  | ~  6000 (Hz)=(step/s) | ~  6000(step/s)/800(step/rot)  = 7.5(rot/s) |
+| 8   | 1600 | ~ 12000 (Hz)=(step/s) | ~ 12000(step/s)/1600(step/rot) = 7.5(rot/s) |
+| 16  | 3200 | ~ 24000 (Hz)=(step/s) | ~ 24000(step/s)/1600(step/rot) = 7.5(rot/s) |
 '''
 
 '''
@@ -92,8 +90,8 @@ class steppermotor():
     # このループはthread用
     def asymptotic(self, base_freq):
         while True:
-            sleep(0.01)
-            self.freq(round(self.FREQ+(base_freq - self.FREQ)/100))
+            sleep(0.1)
+            self.freq(round(self.FREQ+(base_freq - self.FREQ)/10))
         # 例えばself.freq=0でbase_freq=1000の場合．10
 
     def exit_asymptotic(self):
@@ -109,7 +107,7 @@ class steppermotor():
 
     # -------------------------------------------------------- #
 
-    def sin_wave(self, AT):
+    def sin_wave(self, AT, timelimit=20):
         '''
         この関数は周波数freq(Hz)であり，freq(step/秒)でもある．
         マイクロステップ8を使った場合，1600(step/1回転)なので，1600で割ることで，W = freq/1600 (回転/秒)になる．
@@ -131,18 +129,41 @@ class steppermotor():
         t = s
         # T = 2.*math.pi  # period
         # A = 3.*1600.  # amplitude
-        A, T = AT
+        A = 0
+        T = 0
+        timelimit = 30
+        if len(AT_timelimit) == 3:
+            A, T, timelimit = AT_timelimit
+        elif len(AT_timelimit) == 2:
+            A, T = AT_timelimit
+        else:
+            return
         while True:
             # sleep(0.001)
-            self.freq(round(A*math.sin(2.*math.pi*((time_ns()-s)*10**-9)/T)))
+            t = (time_ns()-s)*10**-9
+            self.freq(round(A*math.sin(2.*math.pi*t/T)))
+            if t > timlimit:
+                break
 
-    def cos_wave(self, AT):
+    def cos_wave(self, AT_timelimit):
         s = time_ns()
         t = s
-        A, T = AT
+        A = 0
+        T = 0
+        timelimit = 30
+        if len(AT_timelimit) == 3:
+            A, T, timelimit = AT_timelimit
+        elif len(AT_timelimit) == 2:
+            A, T = AT_timelimit
+        else:
+            return
+
         while True:
             # sleep(0.001)
-            self.freq(round(A*math.cos(2.*math.pi*((time_ns()-s)*10**-9)/T)))
+            t = (time_ns()-s)*10**-9
+            self.freq(round(A*math.cos(2.*math.pi*t/T)))
+            if t > timlimit:
+                break
 
     def exit_wave(self):
         try:
@@ -160,6 +181,15 @@ class steppermotor():
         self.wave_loop = _thread.start_new_thread(
             self.cos_wave, (AT,))
 
+    def start_sin_wave_limited_time(self, AT):
+        self.exit_wave()
+        self.wave_loop = _thread.start_new_thread(
+            self.sin_wave, (AT,))
+
+    def start_cos_wave_limited_time(self, AT):
+        self.exit_wave()
+        self.wave_loop = _thread.start_new_thread(
+            self.cos_wave, (AT,))
     # -------------------------------------------------------- #
 
 ##! -------------------------------------------------------- #
