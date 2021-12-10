@@ -142,9 +142,10 @@ class steppermotor():
         while True:
             # sleep(0.001)
             t = (time_ns()-s)*10**-9
-            self.freq(round(A*math.sin(w*t)))
             if t > timlimit:
                 break
+            else:
+                self.freq(round(A*math.sin(w*t)))
 
     def cos_wave(self, AT_timelimit):
         s = time_ns()
@@ -162,9 +163,10 @@ class steppermotor():
         while True:
             # sleep(0.001)
             t = (time_ns()-s)*10**-9
-            self.freq(round(A*math.cos(w*t)))
             if t > timlimit:
                 break
+            else:
+                self.freq(round(A*math.cos(w*t)))
 
     def exit_wave(self):
         try:
