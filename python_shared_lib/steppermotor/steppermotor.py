@@ -138,10 +138,11 @@ class steppermotor():
             A, T = AT_timelimit
         else:
             return
+        w = 2.*math.pi/T
         while True:
             # sleep(0.001)
             t = (time_ns()-s)*10**-9
-            self.freq(round(A*math.sin(2.*math.pi*t/T)))
+            self.freq(round(A*math.sin(w*t)))
             if t > timlimit:
                 break
 
@@ -157,11 +158,11 @@ class steppermotor():
             A, T = AT_timelimit
         else:
             return
-
+        w = 2.*math.pi/T
         while True:
             # sleep(0.001)
             t = (time_ns()-s)*10**-9
-            self.freq(round(A*math.cos(2.*math.pi*t/T)))
+            self.freq(round(A*math.cos(w*t)))
             if t > timlimit:
                 break
 
