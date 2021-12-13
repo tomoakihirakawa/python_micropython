@@ -20,3 +20,6 @@
 # sin,cos振動
 
 * 関数cos_wave((a,T,end_time))は，a*cos(2*pi*t/T)で
+
+
+![caption](https://github.com/tomoakihirakawa/python_shared/blob/main/python_shared_lib/steppermotor/sloshing_test.mp4)
