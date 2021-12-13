@@ -107,7 +107,7 @@ class steppermotor():
 
     # -------------------------------------------------------- #
 
-    def sin_wave(self, AT, timelimit=20):
+    def sin_wave(self, AT_timelimit):
         '''
         この関数は周波数freq(Hz)であり，freq(step/秒)でもある．
         マイクロステップ8を使った場合，1600(step/1回転)なので，1600で割ることで，W = freq/1600 (回転/秒)になる．
@@ -140,13 +140,13 @@ class steppermotor():
             return
         w = 2.*math.pi/T
         while True:
-            # sleep(0.001)
             t = (time_ns()-s)*10**-9
-            if t > timlimit:
+            if t >= timelimit:
                 break
             else:
                 self.freq(round(A*math.sin(w*t)))
-
+        self.freq(0)
+        
     def cos_wave(self, AT_timelimit):
         s = time_ns()
         t = s
@@ -161,13 +161,13 @@ class steppermotor():
             return
         w = 2.*math.pi/T
         while True:
-            # sleep(0.001)
             t = (time_ns()-s)*10**-9
-            if t > timlimit:
+            if t > timelimit:
                 break
             else:
                 self.freq(round(A*math.cos(w*t)))
-
+        self.freq(0)        
+        
     def exit_wave(self):
         try:
             self.wave_loop.exit()

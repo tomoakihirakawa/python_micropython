@@ -17,3 +17,6 @@
 
 
 
+# sin,cos振動
+
+* 関数cos_wave((a,T,end_time))は，a*cos(2*pi*t/T)で

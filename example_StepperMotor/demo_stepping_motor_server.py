@@ -1,6 +1,7 @@
 from math import pi, sin
 from python_shared_lib.openNetwork import *
-m = MediatorUDP(remote="192.168.0.109")
+# m = MediatorUDP(remote="192.168.11.2")
+m = MediatorUDP(remote="10.0.1.10")
 
 # -------------------------------------------------------- #
 #                            設定                          #
@@ -18,6 +19,6 @@ print("最大速度", c*a*2.*pi/n)
 # -------------------------------------------------------- #
 #                            命令                           #
 # -------------------------------------------------------- #
-# m({"freq": 1000})
-m({"start_cos_wave": (a, T)})
+# m({"freq": 0})
+m({"cos_wave": (a, T, 2*T)})
 # m({"start_sin_wave": (a, T)})

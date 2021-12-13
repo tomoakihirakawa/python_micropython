@@ -653,8 +653,7 @@ try:
             self._FUNCTIONS.update({"exit_asymptotic": self.exit_asymptotic})
             self._FUNCTIONS.update({"start_sin_wave": self.start_sin_wave})
             self._FUNCTIONS.update({"start_cos_wave": self.start_cos_wave})
-            self._FUNCTIONS.update(
-                {"sin_wave": self.sin_wave})  # (振幅,周期,駆動時間)を与える
+            self._FUNCTIONS.update({"sin_wave": self.sin_wave})
             self._FUNCTIONS.update({"cos_wave": self.cos_wave})
             self._FUNCTIONS.update({"exit_wave": self.exit_wave})
 except:
