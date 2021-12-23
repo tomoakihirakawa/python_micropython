@@ -11,9 +11,12 @@ try:
         pass
     # DummySensorServer()
     # DummyMPUServer(monitor_size=(128, 64))
-    # DummyPressureSensorServer()
-    DummyStepperMotorServer(monitor_size=(128, 64))
+
+    # DummyMPUServer(monitor_size=(64, 32))
+    DummyPressureSensorServer(monitor_size=(128, 64))
+    # DummyAccelStepperMotorServer(monitor_size=(128, 64))
+    # DummyStepperMotorServer(monitor_size=(128, 64))
     # DummyFactoryServer(port=40000)
-    # DummyServoMotorServer(ch=[0,1,2,3])
+    # DummyServoMotorServer(monitor_size=(128, 64), ch=[0])
 except:
     pass

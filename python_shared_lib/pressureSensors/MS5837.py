@@ -145,36 +145,33 @@ class MS5837:
 
         # Request D1 conversion (pressure)
         # self.bus.write_byte(self._MS5837_ADDR, self._MS5837_CONVERT_D1_256 + 2*oversampling)
-        write_byte(self.bus, self._MS5837_ADDR,
-                   self._MS5837_CONVERT_D1_256 + 2*oversampling)
+        write_byte(self.bus, self._MS5837_ADDR,self._MS5837_CONVERT_D1_256 + 2*oversampling)
 
         # Maximum conversion time increases linearly with oversampling
         # max time (seconds) ~= 2.2e-6(x) where x = OSR = (2^8, 2^9, ..., 2^13)
         # We use 2.5e-6 for some overhead
-        # sleep(2.5e-6 * 2**(8+oversampling))
-        sleep_us(round(10**6*(2.5e-6 * 2**(8+oversampling))))
+        s = 2.5e-6 * 2**(8+oversampling)
+        sleep(s)
+        # sleep_us(round(10**6*(2.5e-6 * 2**(8+oversampling))))
 
         # d = self.bus.read_i2c_block_data(
         #     self._MS5837_ADDR, self._MS5837_ADC_READ, 3)
 
-        d = read_byte_data(self.bus, self._MS5837_ADDR,
-                           self._MS5837_ADC_READ, 3)
+        d = read_byte_data(self.bus, self._MS5837_ADDR,self._MS5837_ADC_READ, 3)
 
         self._D1 = d[0] << 16 | d[1] << 8 | d[2]
 
         # Request D2 conversion (temperature)
         # self.bus.write_byte(self._MS5837_ADDR, self._MS5837_CONVERT_D2_256 + 2*oversampling)
 
-        write_byte(self.bus, self._MS5837_ADDR,
-                   self._MS5837_CONVERT_D2_256 + 2*oversampling)
+        write_byte(self.bus, self._MS5837_ADDR,self._MS5837_CONVERT_D2_256 + 2*oversampling)
 
         # As above
-        # sleep(2.5e-6 * 2**(8+oversampling))
-        sleep_us(round(10**6*(2.5e-6 * 2**(8+oversampling))))
+        sleep(s)
+        # sleep_us(round(10**6*(2.5e-6 * 2**(8+oversampling))))
 
         # d = self.bus.read_i2c_block_data(self._MS5837_ADDR, self._MS5837_ADC_READ, 3)
-        d = read_byte_data(self.bus, self._MS5837_ADDR,
-                           self._MS5837_ADC_READ, 3)
+        d = read_byte_data(self.bus, self._MS5837_ADDR,self._MS5837_ADC_READ, 3)
         self._D2 = d[0] << 16 | d[1] << 8 | d[2]
 
         # Calculate compensated pressure and temperature

@@ -68,6 +68,13 @@ except:
     print(_red_+" x openNetwork.DummyStepperMotorServer"+_default_color_)
 
 try:
+    from .ServerUDP import DummyAccelStepperMotorServer
+    print(_green_+" * openNetwork.DummyAccelStepperMotorServer"+_default_color_)
+except:
+    print(_red_+" x openNetwork.DummyAccelStepperMotorServer"+_default_color_)
+
+
+try:
     from .ServerUDP import DummyPressureSensorServer
     print(_green_+" * openNetwork.DummyPressureSensorServer"+_default_color_)
 except:

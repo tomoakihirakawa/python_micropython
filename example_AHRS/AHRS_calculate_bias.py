@@ -17,7 +17,7 @@ from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
 
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="10.0.1.5")
+m = MediatorUDP(remote="192.168.11.12")
 m({"set": {"period": 0.02}})
 m({"setLowPass": 0.5})
 # -------------------------------------------------------- #

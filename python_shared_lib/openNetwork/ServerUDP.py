@@ -133,9 +133,8 @@ class ServerUDP():
         #
         self.monitor_width, self.monitor_height = kwargs.get(
             'monitor_size', (64, 32))
-        self.activate_process_loop = kwargs.get(
-            'activate_process_loop', True)
-
+        self.activate_listenner_thread = kwargs.get(
+            'activate_listenner_thread', True)
         # -------------------------------------------------------- #
         # self.clients_list = []
         self.client = None
@@ -194,7 +193,7 @@ class ServerUDP():
         #                           ソケット                        #
         # -------------------------------------------------------- #
         print("ソケット")
-        #! ----------------------- processソケット ---------------------- #
+        #! ----------------------- listen and processソケット ---------------------- #
         self.process_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         processHP = (self.HOST, self.PORT)
         self.process_server.bind(processHP)
@@ -209,11 +208,11 @@ class ServerUDP():
         # """
         # senderループは頻繁に実行する同期的プロセスなので，スレッドの実行は派生クラスに委ねる
         # """
-        sleep(0.1)
+        sleep(0.05)
         # -------------------------------------------------------- #
         #                  プロセスのリスナーループ                    #
         # -------------------------------------------------------- #
-        if self.activate_process_loop:
+        if self.activate_listenner_thread:
             print("リスナーループを開始")
             try:
                 self.thread_process_loop = _thread.start_new_thread(
@@ -225,8 +224,10 @@ class ServerUDP():
                 self.thread_process_loop.setDaemon(True)
                 self.thread_process_loop.start()
                 print("process_loopを開始")
+        else:
+            print("リスナーループは開始しない")
         # -------------------------------------------------------- #
-        sleep(0.1)
+        sleep(0.05)
         # 点滅
         self.led = None
         try:
@@ -279,6 +280,43 @@ class ServerUDP():
             print(self._STATE)
         except:
             print('invalid json ', jsn, '\n cannot be set')
+
+    def listen_then_process(self, timeout=0):
+        """
+        基本はポート50001
+        """
+        try:
+            # if self.monitor_width < 64:
+            #     self.display_scroll(round(-a+a*math.cos(2.*math.pi*i/1.5)))
+            # ---------------------------------- #
+            r_msg, client = self.process_server.recvfrom(128)
+            jsn = decode_bytes(r_msg)
+            print("\u001b[35maccessed from ",
+                  client, " : ", jsn, "\u001b[0m")
+            self.add_remove_client(client)
+            try:
+                for key, value in jsn.items():
+                    fun = self._FUNCTIONS.get(key)
+                    if fun is not None:
+                        print("\u001b[35mThe function is found\u001b[0m")
+                        try:
+                            fun(value)
+                        except:
+                            try:
+                                fun()
+                            except:
+                                print('\u001b[35mThe function is found but argument is not valid',
+                                      key, value, "\u001b[0m")
+                    else:
+                        print('\u001b[35mcannot find function ',
+                              self._FUNCTIONS.items(), "\u001b[0m")
+                        pass
+            except:
+                print('\u001b[35minvalid type of message',
+                      jsn, "\u001b[0m")
+                pass
+        except:
+            pass
 
     def process_loop(self, timeout=0):
         """
@@ -361,13 +399,15 @@ class ServerUDP():
                                 "t_tot": P.total_time*10**-9})
 
     def send(self):
-        if self.led:
-            self.led.on()
-            self.sender_server.send(jsonToBytes(self._STATE))
-            self.led.off()
-        else:
-            self.sender_server.send(jsonToBytes(self._STATE))
-
+        try:
+            if self.led:
+                self.led.on()
+                self.sender_server.send(jsonToBytes(self._STATE))
+                self.led.off()
+            else:
+                self.sender_server.send(jsonToBytes(self._STATE))
+        except:
+            pass
     # -------------------------------------------------------- #
 
     def add_remove_client(self, client):
@@ -410,50 +450,49 @@ class MediatorUDP():
 
     def __del__(self):
         try:
-            self.process_server.close()
+            self.remote_server.close()
             self.receiver_server.close()
-            print('process serverをclose')
+            print('remote serverをclose')
             print('receiver serverをclose')
         except:
             pass
 
     def __init__(self, **kwargs):
-        # 小文字
-        self.REMOTE = kwargs.get('remote', kwargs.get('REMOTE', None))
-        if not self.REMOTE:
+        self.REMOTE_ADDR = kwargs.get('remote', kwargs.get('REMOTE', None))
+        if not self.REMOTE_ADDR:
             raise Exception(
                 "\u001b[31mplease enter a valid remote address\u001b[0m")
-        self.HOST = kwargs.get('host', kwargs.get('HOST', get_ip_address()))
         self.REMOTE_PORT = kwargs.get('remote_port', 50000)
+
+        self.HOST_ADDR = kwargs.get(
+            'host', kwargs.get('HOST', get_ip_address()))
         self.HOST_PORT = kwargs.get('host_port', kwargs.get('port', 50000))
         self.BUFFSIZE = kwargs.get('buff', kwargs.get('BUFF', 256))
-        # 大文字
         self._STATE = {'period': 5.0}
         # -------------------------------------------------------- #
         """
         server    port                  Mediator  port
         # --------------------------------------------- #
-        process   50000  <------------  process   50000
+        remote    50000  <------------  remote    50000
         sender    50001  -- _STATE -->  receiver  50001
         """
 
-        self.process_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.processHP = (self.HOST, self.HOST_PORT)
-        self.process_server.bind(self.processHP)
-        self.processRP = (self.REMOTE, self.REMOTE_PORT)
+        self.remote_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.remote_server.bind((self.HOST_ADDR, self.HOST_PORT))
+        self.REMOTE_ADDR_PORT = (self.REMOTE_ADDR, self.REMOTE_PORT)
 
         # レシーバーだけがメッセージを受け取る
-        self.receiverHP = (self.HOST, self.HOST_PORT+1)
         self.receiver_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.receiverHP = (self.HOST_ADDR, self.HOST_PORT+1)
         self.receiver_server.bind(self.receiverHP)
         # self.receiver_server.settimeout(0.)と同じ
         # self.receiver_server.setblocking(True)
 
         # -------------------------------------------------------- #
 
-        print('リモートアドレスは', self.REMOTE)
-        print('ホストアドレスは', self.HOST)
-        print('process serverを', self.processHP, 'にバインド')
+        print('リモートアドレスは', self.REMOTE_ADDR)
+        print('ホストアドレスは', self.HOST_ADDR)
+        print('remote serverを', (self.HOST_ADDR, self.HOST_PORT), 'にバインド')
         print('receiver serverを', self.receiverHP, 'にバインド')
 
         print("receiver_loopをスレッドを使って開始")
@@ -480,7 +519,7 @@ class MediatorUDP():
 
     def __call__(self, key=None):
         if key:
-            self.process_server.sendto(jsonToBytes(key), self.processRP)
+            self.remote_server.sendto(jsonToBytes(key), self.REMOTE_ADDR_PORT)
         return self._STATE
 
     def get(self, key=None):
@@ -744,37 +783,71 @@ try:
     class DummyPressureSensorServer(PressureSensor, ServerUDP):
 
         def __init__(self, **kwargs):
+            '''
+            リスナーループを開始しないように変更
+            '''
+            kwargs["activate_listenner_thread"] = False
+
             ServerUDP.__init__(self, **kwargs)
             PressureSensor.__init__(self, **kwargs)
 
-            if _MicroPython_:
-                self.thread_process_loop = _thread.start_new_thread(
-                    self.updater_loop, ())
-            else:
-                self.thread_process_loop = threading.Thread(
-                    target=self.updater_loop, args=())
-                self.thread_process_loop.setDaemon(True)
-                self.thread_process_loop.start()
+            self._STATE.update(
+                {self.HOST: {"ssid": self.ssid, "port": self.PORT, "buffsize": self.BUFFSIZE}})
 
-            self._STATE.update({self.HOST: {"ssid": self.ssid,
-                                            "port": self.PORT,
-                                            "buffsize": self.BUFFSIZE}})
-
-        def updater_loop(self):
-            P = pacer()
+            start = time_ns()
+            last_time = time_ns()
+            current_time = last_time
             while True:
-                print(self._STATE)
-                P.pace(self._STATE["period"])
-                if self.read():
+                sleep(self._STATE["period"])
+                if self.read(5):
+                    # print(self._STATE)
+                    current_time = time_ns()
                     self._STATE.update({"p": self.pressure(),
                                         "depth": self.depth(),
                                         "temp": self.temperature(),
-                                        "t_tot": P.total_time*10**-9,
-                                        "t_min": P.min_time*10**-9})
+                                        "dt": (current_time-last_time)*10**-9})
+                    last_time = current_time
                     self.send()
+                    self.listen_then_process()
                 else:
                     print("Sensor read failed!")
                     exit(1)
+
+    # class DummyPressureSensorServer(PressureSensor, ServerUDP):
+
+    #     def __init__(self, **kwargs):
+    #         '''
+    #         リスナーループを開始しないように変更
+    #         '''
+    #         kwargs["activate_listenner_thread"] = False
+
+    #         ServerUDP.__init__(self, **kwargs)
+    #         PressureSensor.__init__(self, **kwargs)
+
+    #         if _MicroPython_:
+    #             self.thread_process_loop = _thread.start_new_thread(self.updater_loop, ())
+    #         else:
+    #             self.thread_process_loop = threading.Thread(target=self.updater_loop, args=())
+    #             self.thread_process_loop.setDaemon(True)
+    #             self.thread_process_loop.start()
+
+    #         self._STATE.update({self.HOST: {"ssid": self.ssid,"port": self.PORT,"buffsize": self.BUFFSIZE}})
+
+    #     def updater_loop(self):
+    #         P = pacer()
+    #         while True:
+    #             print(self._STATE)
+    #             P.pace(self._STATE["period"])
+    #             if self.read():
+    #                 self._STATE.update({"p": self.pressure(),
+    #                                     "depth": self.depth(),
+    #                                     "temp": self.temperature(),
+    #                                     "t_tot": P.total_time*10**-9,
+    #                                     "t_min": P.min_time*10**-9})
+    #                 self.send()
+    #             else:
+    #                 print("Sensor read failed!")
+    #                 exit(1)
 
 except:
     pass
@@ -799,28 +872,27 @@ try:
     class DummyMPUServer(MPU9250, ServerUDP):
 
         def __init__(self, **kwargs):
+            kwargs["activate_listenner_thread"] = False
             ServerUDP.__init__(self, **kwargs)
             """
             注意：self._STATEは，すでに親クラスで定義されて，値が入っているので，上書きせず，追記すること
             """
             MPU9250.__init__(self)
-            self._FUNCTIONS.update(
-                {"calibrate_mag": self.AK8963.calibrate,
-                    "calibrate_gyro": self.MPU6050.calibrate_gyro,
-                    "setOffset": self.AK8963.setOffset,
-                    "setLowPass": self.setLowPass,
-                    "setScale": self.AK8963.setScale})
 
+            self._FUNCTIONS.update({"calibrate_mag": self.AK8963.calibrate,
+                                    "calibrate_gyro": self.MPU6050.calibrate_gyro,
+                                    "setOffset": self.AK8963.setOffset,
+                                    "setScale": self.AK8963.setScale})
             self.MAG = (0, 0, 0)
             self.GYRO = (0, 0, 0)
             self.ACCEL = (0, 0, 0)
             self.alpha = 1.
-
             start = time_ns()
-
+            last_time = start
+            current_time = last_time
             A, M, G = self.AMG()
             while True:
-                # print(self._STATE)
+                print(self._STATE)
                 # P.pace(self._STATE["period"])
                 # self.process(self._STATE["period"])
                 sleep(self._STATE["period"])
@@ -840,9 +912,16 @@ try:
                                  tmp*self.GYRO[1] + self.alpha*G[1],
                                  tmp*self.GYRO[2] + self.alpha*G[2])
 
+                    current_time = time_ns()
                     self._STATE.update(
-                        {"gyro": self.GYRO, "mag": self.MAG, "accel": self.ACCEL, "time_ns": time_ns()-start})
-                    self.sender_server.send(jsonToBytes(self._STATE))
+                        {"gyro": self.GYRO,
+                         "mag": self.MAG,
+                         "accel": self.ACCEL,
+                         "time_ns": current_time,
+                         "dt": (current_time-last_time)*10**-9})
+                    last_time = current_time
+                    self.send()
+                    self.listen_then_process()
                 except:
                     print("Sensor read failed!")
                     print(A, M, G)
@@ -851,9 +930,8 @@ try:
                     sleep(0.2)
                     pass
 
-        def setLowPass(self, a):
-            self.alpha = a
-
+            def setLowPass(self, a):
+                self.alpha = a
 
 except:
     pass

@@ -90,8 +90,8 @@ class steppermotor():
     # このループはthread用
     def asymptotic(self, base_freq):
         while True:
-            sleep(0.1)
-            self.freq(round(self.FREQ+(base_freq - self.FREQ)/10))
+            sleep(0.05)
+            self.freq(round(self.FREQ+(base_freq - self.FREQ)/20))
         # 例えばself.freq=0でbase_freq=1000の場合．10
 
     def exit_asymptotic(self):
@@ -146,7 +146,7 @@ class steppermotor():
             else:
                 self.freq(round(A*math.sin(w*t)))
         self.freq(0)
-        
+
     def cos_wave(self, AT_timelimit):
         s = time_ns()
         t = s
@@ -166,8 +166,8 @@ class steppermotor():
                 break
             else:
                 self.freq(round(A*math.cos(w*t)))
-        self.freq(0)        
-        
+        self.freq(0)
+
     def exit_wave(self):
         try:
             self.wave_loop.exit()

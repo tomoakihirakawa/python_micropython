@@ -18,8 +18,8 @@ from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
 
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="10.0.1.5")
-m({"set": {"period": 0.0}})
+m = MediatorUDP(remote="10.0.1.21")
+m({"set": {"period": 0.001}})
 
 #@ -------------------------------------------------------- #
 #@                   ジャイロセンサーの校正で確認                #
@@ -53,7 +53,7 @@ while True:
         if T_ns_ is not T_ns:
             T_ns_ = T_ns
             mag = Subtract(m.get("mag"), bias_mag)
-            gravity = Times(2, m.get("accel"))
+            gravity = Times(1, m.get("accel"))
             for i in range(3):
                 a = 0.2
                 A[i] = (1-a)*A[i] + a*gravity[i]
@@ -70,6 +70,7 @@ while True:
         break
 
 fusion = Fusion(A, M)  # %fusion作成
+m({"set": {"period": 0.001}})
 
 #b% -------------------------------------------------------- #
 
@@ -85,9 +86,9 @@ X = []
 Y0 = []
 Y1 = []
 Y2 = []
-lines = [ax.plot(X, Y0, '-', label="x")[0],
-         ax.plot(X, Y1, '-', label="y")[0],
-         ax.plot(X, Y2, '-', label="z")[0]]
+lines = [ax.plot(X, Y0, '.-', label="x")[0],
+         ax.plot(X, Y1, '.-', label="y")[0],
+         ax.plot(X, Y2, '.-', label="z")[0]]
 ax.set_xlabel('time (s)')
 ax.set_ylabel('sensor value')
 fig.canvas.draw()
@@ -97,8 +98,11 @@ plt.show(block=False)
 current_time_ = 0.
 current_time = 0.
 T_ns = 0
-
-m({"setLowPass": 0.7})
+Q = None
+accel = None
+gyro = None
+mag = None
+# m({"setLowPass": 0.7})
 for i in range(10000):
     sleep(0.001)
     try:
@@ -108,10 +112,10 @@ for i in range(10000):
             T_ns_ = T_ns
             current_time = (time_ns()-start)*10**-9
             # accel = data["accel"]
-            accel = Times(2, data["accel"])
+            accel = Times(1, data["accel"])
             mag = Subtract(data.get("mag"), bias_mag)
             gyro = Subtract(data.get("gyro"), bias_gyro)
-            print("dt = ", current_time-current_time_)
+            # print("dt = ", current_time-current_time_)
             current_time_ = current_time
             # -------------------------------------------------------- #
             Q = fusion.updateStandard(
@@ -119,7 +123,7 @@ for i in range(10000):
                 mag,
                 gyro,
                 current_time,
-                1)
+                1.)
             if i > 5:
                 # gG = Q.Rs(gravity)
                 # a_ = [accel[0] - gG[0], accel[1] - gG[1], accel[2] - gG[2]]
@@ -146,9 +150,12 @@ for i in range(10000):
                 ax.autoscale()
                 ax.relim()
                 fig.canvas.draw()
-                plt.pause(0.0001)
+                plt.pause(0.01)
 
     except KeyboardInterrupt:
         plt.close('all')
         m({"set": {"period": 1.}})
         break
+
+plt.close('all')
+m({"set": {"period": 1.}})

@@ -5,6 +5,7 @@ echo "ampy -p $1 put ssid_pwd.json"
 ampy -p "$1" put ssid_pwd.json
 echo "ampy -p $1 put python_shared_lib"
 sudo rm -r python_shared_lib/__pycache__
+sudo rm -r python_shared_lib/*/__pycache__
 ampy -p "$1" put python_shared_lib
 # echo "ampy -p $1 put servomotor"
 # sudo rm -r servomotor/__pycache__
