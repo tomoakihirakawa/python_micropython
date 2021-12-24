@@ -90,14 +90,14 @@ ax0 = fig.add_subplot(311)
 X = [0]
 Y0 = [0]
 Yapprox0 = [0]
-li0, = ax0.plot(X, Y0, '-')
-liApprox0, = ax0.plot(X, Yapprox0, '-')
+li0, = ax0.plot(X, Y0, '.-')
+liApprox0, = ax0.plot(X, Yapprox0, '.-')
 ax1 = fig.add_subplot(312)
 Y1 = [0]
-li1, = ax1.plot(X, Y1, '-')
+li1, = ax1.plot(X, Y1, '.-')
 ax2 = fig.add_subplot(313)
 Y2 = [0]
-li2, = ax2.plot(X, Y2, '-')
+li2, = ax2.plot(X, Y2, '.-')
 
 fig.canvas.draw()
 plt.show(block=False)
@@ -119,8 +119,9 @@ current_time = 0.
 accel = [0., 0., 0.]
 mag = [0., 0., 0.]
 T_ns = 0
+m({"set": {"period": 0.}})
 for i in range(10000):
-    sleep(0.005)
+    sleep(0.001)
     try:
         data = m()
         T_ns = data.get("time_ns")
@@ -131,7 +132,7 @@ for i in range(10000):
             accel = Times(5, data["accel"])
             mag = Subtract(data.get("mag"), bias_mag)
             gyro = Subtract(data.get("gyro"), bias_gyro)
-            print("dt = ", current_time-current_time_)
+            print(data)
             current_time_ = current_time
             # -------------------------------------------------------- #
             Q = fusion.solveForQuaternion(

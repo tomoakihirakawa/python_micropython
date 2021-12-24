@@ -621,7 +621,6 @@ class RecieverUDP():
 ##                   通信確認用サーバークラス   　　　　         #
 ## -------------------------------------------------------- #
 
-
 class DummySensor():
     def __init__(self):
         print('DummySensor is initialized')
@@ -871,6 +870,9 @@ try:
 
     class DummyMPUServer(MPU9250, ServerUDP):
 
+        def setLowPass(self, a):
+            self.alpha = a
+
         def __init__(self, **kwargs):
             kwargs["activate_listenner_thread"] = False
             ServerUDP.__init__(self, **kwargs)
@@ -882,56 +884,59 @@ try:
             self._FUNCTIONS.update({"calibrate_mag": self.AK8963.calibrate,
                                     "calibrate_gyro": self.MPU6050.calibrate_gyro,
                                     "setOffset": self.AK8963.setOffset,
+                                    "setLowPass": self.setLowPass,
                                     "setScale": self.AK8963.setScale})
-            self.MAG = (0, 0, 0)
-            self.GYRO = (0, 0, 0)
-            self.ACCEL = (0, 0, 0)
+            self.MAG = (0., 0., 0.)
+            self.GYRO = (0., 0., 0.)
+            self.ACCEL = (0., 0., 0.)
             self.alpha = 1.
             start = time_ns()
             last_time = start
             current_time = last_time
             A, M, G = self.AMG()
+            count = 0
+            self.listen_then_process()
+            self.CURRENT_TIME_NS = 0
+            self.DT = 0.
+
             while True:
-                print(self._STATE)
-                # P.pace(self._STATE["period"])
-                # self.process(self._STATE["period"])
                 sleep(self._STATE["period"])
                 try:
                     A, M, G = self.AMG()
-
                     tmp = (1.-self.alpha)
-                    self.ACCEL = (tmp*self.ACCEL[0] + self.alpha*A[0],
-                                  tmp*self.ACCEL[1] + self.alpha*A[1],
-                                  tmp*self.ACCEL[2] + self.alpha*A[2])
+                    # ------------------------- 参照を更新 ------------------------ #
 
-                    self.MAG = (tmp*self.MAG[0] + self.alpha*M[0],
-                                tmp*self.MAG[1] + self.alpha*M[1],
-                                tmp*self.MAG[2] + self.alpha*M[2])
+                    self.CURRENT_TIME_NS = time_ns()
 
-                    self.GYRO = (tmp*self.GYRO[0] + self.alpha*G[0],
-                                 tmp*self.GYRO[1] + self.alpha*G[1],
-                                 tmp*self.GYRO[2] + self.alpha*G[2])
+                    self.DT = (self.CURRENT_TIME_NS-last_time)*10**-9
 
-                    current_time = time_ns()
                     self._STATE.update(
-                        {"gyro": self.GYRO,
-                         "mag": self.MAG,
-                         "accel": self.ACCEL,
-                         "time_ns": current_time,
-                         "dt": (current_time-last_time)*10**-9})
-                    last_time = current_time
+                        {"gyro": (tmp*self.GYRO[0] + self.alpha*G[0],
+                                 tmp*self.GYRO[1] + self.alpha*G[1],
+                                 tmp*self.GYRO[2] + self.alpha*G[2]),
+                         "mag": (tmp*self.MAG[0] + self.alpha*M[0],
+                                tmp*self.MAG[1] + self.alpha*M[1],
+                                tmp*self.MAG[2] + self.alpha*M[2]),
+                         "accel": (tmp*self.ACCEL[0] + self.alpha*A[0],
+                                  tmp*self.ACCEL[1] + self.alpha*A[1],
+                                  tmp*self.ACCEL[2] + self.alpha*A[2]),
+                         "time_ns": self.CURRENT_TIME_NS,
+                         "dt": self.DT})
+
+                    # -------------------------------------------------------- #
+                    last_time = self.CURRENT_TIME_NS
                     self.send()
-                    self.listen_then_process()
+                    count += 1
+                    if count is 5:
+                        self.listen_then_process()
+                        count = 0
+                    
                 except:
                     print("Sensor read failed!")
-                    print(A, M, G)
-                    print(self.ACCEL, self.MAG, self.GYRO)
                     print(self._STATE)
                     sleep(0.2)
                     pass
 
-            def setLowPass(self, a):
-                self.alpha = a
 
 except:
     pass
