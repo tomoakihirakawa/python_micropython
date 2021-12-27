@@ -25,9 +25,10 @@ m({"set": {"period": 0.001}})
 #@                   ジャイロセンサーの校正で確認                #
 #@ -------------------------------------------------------- #
 
-bias_gyro = (-0.1026451, 0.1362752, 0.1168856)
+bias_gyro = (-0.3603053, -0.09160305, -0.0610687)
 
-minmax_mag = [[-0.225141, 5.31778], [-0.982585, 4.41378], [-1.27578, 4.21689]]
+# minmax_mag = [[-0.225141, 5.31778], [-0.982585, 4.41378], [-1.27578, 4.21689]]
+minmax_mag = [[-4.019531, 0.8254395], [-0.873291, 3.756348], [-0.107666, 5.455078]]
 
 bias_mag = ((minmax_mag[0][1]+minmax_mag[0][0])/2,
             (minmax_mag[1][1]+minmax_mag[1][0])/2,
@@ -47,13 +48,13 @@ M = [0, 0, 0]
 G = [0, 0, 0]
 
 while True:
-    sleep(0.02)
+    sleep(0.01)
     try:
         T_ns = m.get("time_ns")
         if T_ns_ is not T_ns:
             T_ns_ = T_ns
             mag = Subtract(m.get("mag"), bias_mag)
-            gravity = Times(1, m.get("accel"))
+            gravity = Times(2, m.get("accel"))
             for i in range(3):
                 a = 0.2
                 A[i] = (1-a)*A[i] + a*gravity[i]
@@ -66,11 +67,11 @@ while True:
         sleep(1.)
         pass
 
-    if count > 400:
+    if count > 500:
         break
 
 fusion = Fusion(A, M)  # %fusion作成
-m({"set": {"period": 0.001}})
+m({"set": {"period": 0.}})
 
 #b% -------------------------------------------------------- #
 
@@ -102,20 +103,25 @@ Q = None
 accel = None
 gyro = None
 mag = None
-# m({"setLowPass": 0.7})
-for i in range(10000):
-    sleep(0.001)
+m({"setLowPass": 0.8})
+for i in range(10):
+    sleep(0.1)
+    m({"set": {"period": 0.005}})
+    
+m({"set": {"period": 0.005}})
+for i in range(1000000):
+    sleep(0.005)
     try:
         data = m()
         T_ns = data.get("time_ns")
         if T_ns_ is not T_ns:
             T_ns_ = T_ns
-            current_time = (time_ns()-start)*10**-9
+            current_time = (T_ns-start)*10**-9
             # accel = data["accel"]
-            accel = Times(1, data["accel"])
+            accel = Times(2, data["accel"])
             mag = Subtract(data.get("mag"), bias_mag)
             gyro = Subtract(data.get("gyro"), bias_gyro)
-            # print("dt = ", current_time-current_time_)
+            print("dt = ", current_time-current_time_)
             current_time_ = current_time
             # -------------------------------------------------------- #
             Q = fusion.updateStandard(
@@ -132,25 +138,28 @@ for i in range(10000):
                 # print(Q.Rs(A))
                 # a_ = fusion.interpYPR(current_time)
                 IA.add(current_time, a_)
-                # a_ = IA.integral
+                a_ = IA.integral
                 # -------------------------------------------------------- #
                 X.append(current_time)
                 Y0.append(a_[0])
                 Y1.append(a_[1])
                 Y2.append(a_[2])
                 # -------------------------------------------------------- #
-                if len(X) > 100:
+                if len(X) > 500:
                     X.pop(0)
                     Y0.pop(0)
                     Y1.pop(0)
                     Y2.pop(0)
+
+            if i%20==0:
                 lines[0].set_data(X, Y0)
                 lines[1].set_data(X, Y1)
                 lines[2].set_data(X, Y2)
                 ax.autoscale()
                 ax.relim()
                 fig.canvas.draw()
-                plt.pause(0.01)
+                fig.canvas.flush_events()
+                plt.pause(0.001)
 
     except KeyboardInterrupt:
         plt.close('all')

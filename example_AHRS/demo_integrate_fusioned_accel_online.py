@@ -32,8 +32,9 @@ def NormalizeList(mag):
 
 
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="10.0.1.21")
-m({"set": {"period": 0.02}})
+# m = MediatorUDP(remote="10.0.1.21")
+m = MediatorUDP(remote="192.168.11.12")
+m({"set": {"period": 0.01}})
 # -------------------------------------------------------- #
 
 #b@ -------------------------------------------------------- #
@@ -104,12 +105,14 @@ plt.show(block=False)
 
 
 #b@ -------------------- ジャイロセンサーの校正で確認 -------------------- #
+minmax_mag = [[-3.132782, 0.7551575],
+              [-1.158905, 2.50473],
+              [-0.1271057, 3.663635]]
+
 bias_gyro = (-0.07128319964117816,
              0.12235516538683028,
              0.11174474504429761)
-minmax_mag = [[-1.698909, 5.94178],
-              [-2.672332, 4.888905],
-              [-2.648593, 4.954339]]
+
 bias_mag = (minmax_mag[0][1]-minmax_mag[0][0],
             minmax_mag[1][1]-minmax_mag[1][0],
             minmax_mag[2][1]-minmax_mag[2][0])
@@ -129,7 +132,7 @@ for i in range(10000):
             T_ns_ = T_ns
             current_time = (time_ns()-start)*10**-9
             # accel = data["accel"]
-            accel = Times(5, data["accel"])
+            accel = Times(1, data["accel"])
             mag = Subtract(data.get("mag"), bias_mag)
             gyro = Subtract(data.get("gyro"), bias_gyro)
             print(data)

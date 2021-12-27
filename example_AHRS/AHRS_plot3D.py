@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from openNetwork import *
+from python_shared_lib.openNetwork import *
 from math import pi, sin
 from statistics import mean
 import json
@@ -19,7 +19,7 @@ red = "\033[31m"
 blue = "\033[34m"
 default = "\033[39m"
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="192.168.1.40")
+m = MediatorUDP(remote="10.0.1.21")
 m({"set": {"period": 0.02}})
 m({"setLowPass": 0.5})
 # -------------------------------------------------------- #
