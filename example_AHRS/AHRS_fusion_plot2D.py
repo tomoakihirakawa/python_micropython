@@ -18,8 +18,10 @@ from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
 
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="10.0.1.21")
-m({"set": {"period": 0.001}})
+m = MediatorUDP(remote="10.0.1.7")
+for i in range(5):
+    sleep(0.5)
+    m({"set": {"period": 0.001}})
 
 #@ -------------------------------------------------------- #
 #@                   ジャイロセンサーの校正で確認                #

@@ -16,10 +16,18 @@ import matplotlib
 from matplotlib import pyplot as plt
 matplotlib.rcParams['font.family'] = 'Times New Roman'
 # -------------------------------------------------------- #
-m = MediatorUDP(remote="10.0.1.21")
-for i in range(10):
-    sleep(0.1)
+m = MediatorUDP(remote="10.0.1.7")
+
+for i in range(1000):
+    sleep(1.)
     m({"set": {"period": 0.001}})
+    try:
+        t = m.get("time_ns")
+        print(t)
+        if t:
+            break
+    except:
+        pass
     # m({"setLowPass": 1.})
 # -------------------------------------------------------- #
 
@@ -59,7 +67,9 @@ while True:
     if count > 1000:
         break
 
-f = open("./dataAHRS.json", "w")
+import os
+fdir = os.path.dirname(__file__)
+f = open(fdir+"/dataAHRS.json", "w")
 json.dump(data, f, ensure_ascii=True)
 f.close()
 
