@@ -10,10 +10,10 @@ try:
     except:
         pass
     # DummySensorServer()
-    DummyMPUServer(monitor_size=(128, 64))
+    # DummyMPUServer(monitor_size=(128, 64))
 
     # DummyMPUServer(monitor_size=(64, 32))
-    # DummyPressureSensorServer(monitor_size=(128, 64))
+    DummyPressureSensorServer(monitor_size=(128, 64))
     # DummyAccelStepperMotorServer(monitor_size=(128, 64))
     # DummyStepperMotorServer(monitor_size=(128, 64))
     # DummyFactoryServer(port=40000)

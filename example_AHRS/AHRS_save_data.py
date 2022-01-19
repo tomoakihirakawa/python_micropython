@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 from python_shared_lib.openNetwork import *
 from math import pi, sin
@@ -67,7 +68,6 @@ while True:
     if count > 1000:
         break
 
-import os
 fdir = os.path.dirname(__file__)
 f = open(fdir+"/dataAHRS.json", "w")
 json.dump(data, f, ensure_ascii=True)
