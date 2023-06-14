@@ -6,3 +6,4 @@ CMake*
 ./.*
 .DS*
 .gitignore
+*pwd*
