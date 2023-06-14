@@ -1,4 +1,4 @@
-from servomotor import *
+from lib.servomotor import *
 from time import sleep, time_ns
 import json
 import math

@@ -1,6 +1,6 @@
 import os
 import matplotlib.pyplot as plt
-from python_shared_lib.openNetwork import *
+from lib.openNetwork import *
 from math import pi, sin
 from statistics import mean
 import json

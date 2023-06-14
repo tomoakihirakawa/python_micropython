@@ -1,4 +1,4 @@
-from python_shared_lib.openNetwork import *
+from lib.openNetwork import *
 from time import time, sleep
 
 m = MediatorUDP(remote="192.168.0.113")
