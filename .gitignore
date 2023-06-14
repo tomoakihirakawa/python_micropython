@@ -1,9 +1,0 @@
-__pycache__
-cmake*
-test*
-CMake*
-.vscode*
-./.*
-.DS*
-.gitignore
-*pwd*
