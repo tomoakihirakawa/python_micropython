@@ -44,7 +44,9 @@ s.setDegree(180)
 
 
 
-## ⚙️サーボモーター1つの制御
+## ⚙️サーボモーター1つの制御 
+
+![](sample.gif)
 
 
 [./demo0_move_servo.py#L1](./demo0_move_servo.py#L1)
