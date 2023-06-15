@@ -2,8 +2,9 @@
 
 - [🤖サーボモーターの制御](#🤖サーボモーターの制御)
     - [⚙️準備](#⚙️準備)
-    - [⚙️サーボモーター1つの制御](#⚙️サーボモーター1つの制御)
-    - [⚙️複数のサーボモーターの制御](#⚙️複数のサーボモーターの制御)
+        - [🔩🔩servomotorクラス](#🔩🔩servomotorクラス)
+    - [⚙️例）サーボモーター1つの制御](#⚙️例）サーボモーター1つの制御)
+    - [⚙️例）複数のサーボモーターの制御](#⚙️例）複数のサーボモーターの制御)
 
 
 ---
@@ -11,7 +12,7 @@
 
 ## ⚙️準備 
 
-このディレクトリに`lib`をシンボリックリンクで作成しておく．
+このディレクトリ`python_micropython/example_ServoMotor`に`lib`をシンボリックリンクで作成しておく．
 
 ```
 ln -s ../lib ./lib
@@ -28,25 +29,6 @@ from lib.servomotor import *
 `__init__.py`には，`from .servomotor import *`という命令が書かれている．
 この意味は，`lib`内の`servomotor`内の`servomotor.py`に書かれている関数やクラスを全てインポートするという意味である．
 これで，`servomotor.py`内の`servomotor`クラスを使うことができる．
-
-このservomotorクラスは，`servomotor(チャンネル, オフセット角度)`で初期化する．
-例えば，以下のようにすると，チャンネル0のサーボモーターを初期角度90度で初期化できる．
-
-```
-s = servomotor(0, 90)
-```
-
-角度を変更するには，`setDegree`を使う．例えば，以下のようにすると，チャンネル0のサーボモーターの角度を180度に変更できる．
-
-```
-s.setDegree(180)
-```
-
-[../lib/servomotor/servomotor.py#L10](../lib/servomotor/servomotor.py#L10)
-
-
-
-## ⚙️サーボモーター1つの制御 
 
 <details>
 
@@ -67,6 +49,27 @@ from パッケージ名 import *
 
 </details>
 
+### 🔩🔩servomotorクラス  
+
+このservomotorクラスは，`servomotor(チャンネル, オフセット角度)`で初期化する．
+例えば，以下のようにすると，チャンネル0のサーボモーターを初期角度90度で初期化できる．
+
+```
+s = servomotor(0, 90)
+```
+
+角度を変更するには，`setDegree`を使う．例えば，以下のようにすると，チャンネル0のサーボモーターの角度を180度に変更できる．
+
+```
+s.setDegree(180)
+```
+
+[../lib/servomotor/servomotor.py#L10](../lib/servomotor/servomotor.py#L10)
+
+
+
+## ⚙️例）サーボモーター1つの制御 
+
 ここでは，以下のようにインポートしたが
 
 ```
@@ -86,7 +89,7 @@ from lib.servomotor.servomotor import servomotor
 [./demo0_move_servo.py#L1](./demo0_move_servo.py#L1)
 
 
-## ⚙️複数のサーボモーターの制御 
+## ⚙️例）複数のサーボモーターの制御 
 
 やり方は，サーボモーター一つの場合と同じ．
 これは，配列にサーボモーターのインスタンスを格納して実行した例．

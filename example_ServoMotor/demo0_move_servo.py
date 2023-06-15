@@ -4,7 +4,7 @@
 
 ## 準備
 
-このディレクトリに`lib`をシンボリックリンクで作成しておく．
+このディレクトリ`python_micropython/example_ServoMotor`に`lib`をシンボリックリンクで作成しておく．
 
 ```
 ln -s ../lib ./lib
@@ -21,10 +21,6 @@ from lib.servomotor import *
 `__init__.py`には，`from .servomotor import *`という命令が書かれている．
 この意味は，`lib`内の`servomotor`内の`servomotor.py`に書かれている関数やクラスを全てインポートするという意味である．
 これで，`servomotor.py`内の`servomotor`クラスを使うことができる．
-
-\insert{servomotor_calss}
-
-## サーボモーター1つの制御
 
 <details>
 
@@ -44,6 +40,10 @@ from パッケージ名 import *
 ---
 
 </details>
+
+\insert{servomotor_calss}
+
+## 例）サーボモーター1つの制御
 
 ここでは，以下のようにインポートしたが
 
