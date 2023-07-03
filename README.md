@@ -14,5 +14,5 @@
 - [Contents](./example_ServoMotor/README.md#Contents)
 - [🤖サーボモーターの制御](./example_ServoMotor/README.md#🤖サーボモーターの制御)
     - [⚙️準備](./example_ServoMotor/README.md#⚙️準備)
-    - [⚙️サーボモーター1つの制御](./example_ServoMotor/README.md#⚙️サーボモーター1つの制御)
-    - [⚙️複数のサーボモーターの制御](./example_ServoMotor/README.md#⚙️複数のサーボモーターの制御)
+    - [⚙️例）サーボモーター1つの制御](./example_ServoMotor/README.md#⚙️例）サーボモーター1つの制御)
+    - [⚙️例）複数のサーボモーターの制御](./example_ServoMotor/README.md#⚙️例）複数のサーボモーターの制御)

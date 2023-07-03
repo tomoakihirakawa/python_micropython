@@ -9,6 +9,8 @@ from ..PCA9685 import PCA9685
 
 '''DOC_EXTRACT servomotor_calss
 
+### servomotorクラス
+
 このservomotorクラスは，`servomotor(チャンネル, オフセット角度)`で初期化する．
 例えば，以下のようにすると，チャンネル0のサーボモーターを初期角度90度で初期化できる．
 

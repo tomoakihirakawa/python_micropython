@@ -1,40 +1,6 @@
 #!/bin/bash
 
-# rsync --update -vr --exclude "CMake*" --exclude "*.vtu" /Users/tomoaki/Dropbox/markdown/cpp/include/* tomoaki@10.0.1.20:/home/tomoaki/research/cpp/include/
-# rsync --update -vr --exclude "CMake*" --exclude "*.vtu" /Users/tomoaki/Dropbox/markdown/cpp/builds/build* tomoaki@10.0.1.20:/home/tomoaki/research/cpp/builds/
+remote='pi@10.0.1.19:/home/pi/research/python_micropython'
+local='/Users/tomoaki/Dropbox/code/python_micropython'
 
-original_dir='/Users/tomoaki/Dropbox/markdown'
-
-# ping -c 1 192.168.1.59
-# if [[ "$?" -eq "0" ]]; then
-#   dir='pi@192.168.1.59:/home/pi/research'
-# else
-#   ping -c 1 10.0.1.4
-#   if [[ "$?" -eq "0" ]]; then
-#       dir='pi@10.0.1.4:/home/pi/research'
-#   else
-#       ping -c 1 10.0.1.11
-#       if [[ "$?" -eq "0" ]]; then
-#           dir='pi@10.0.1.4:/home/pi/research'
-#       fi
-#   fi
-# fi
-
-# dir='pi@192.168.0.104:/home/pi/research'
-#dir='pi@192.168.1.59:/home/pi/research'
-# dir='pi@10.0.1.4:/home/pi/research'
-# dir='pi@192.168.1.15:/home/pi/research'
-#dir='pi@192.168.0.100:/home/pi/research'
-
-#dir='pi@192.168.0.113:/home/pi/research'
-
-dir='pi@10.0.1.12:/home/pi/research'
-
-rsync --update -vr --exclude "example_vtk/*" ${original_dir}/cpp/include/* ${dir}/cpp/include
-rsync --update -vr --exclude "example_vtk/*" ${original_dir}/cpp/builds/build_pybind11/* ${dir}/cpp/builds/build_pybind11
-# rsync --update -vr ${original_dir}/cpp/builds/build_pybind11/fundamental.cpython* ${dir}/pi
-rsync --update -vr --exclude "example_vtk/*" ${original_dir}/pi/* ${dir}/pi
-rsync --update -vr --exclude "example_vtk/*" ${original_dir}/python_shared/* ${dir}/pi
-
-#rsync --update -vr /Users/tomoaki/Dropbox/markdown/pi/* pi@192.168.0.105:/home/pi/research
-#rsync --update -vr /Users/tomoaki/Dropbox/markdown/pi/* pi@192.168.1.39:/home/pi/research
+rsync --update -vr --exclude "CMake*" --exclude "main" --exclude "*.mov" --exclude "*.nb" --exclude "*.vtu" --exclude "*.key" --exclude "*.avi" --exclude "*.gif" --exclude "*.vtp" ${local}/* ${remote}/
