@@ -5,6 +5,7 @@
         - [🔩🔩servomotorクラス](#🔩🔩servomotorクラス)
     - [⚙️例）サーボモーター1つの制御](#⚙️例）サーボモーター1つの制御)
     - [⚙️例）複数のサーボモーターの制御](#⚙️例）複数のサーボモーターの制御)
+    - [⚙️ライトヒルのロボットの制御](#⚙️ライトヒルのロボットの制御)
 
 
 ---
@@ -89,6 +90,7 @@ from lib.servomotor.servomotor import servomotor
 [./demo0_move_servo.py#L1](./demo0_move_servo.py#L1)
 
 
+---
 ## ⚙️例）複数のサーボモーターの制御 
 
 やり方は，サーボモーター一つの場合と同じ．
@@ -96,6 +98,17 @@ from lib.servomotor.servomotor import servomotor
 
 
 [./demo1_move_multiple_servos.py#L1](./demo1_move_multiple_servos.py#L1)
+
+
+---
+## ⚙️ライトヒルのロボットの制御 
+
+ライトヒルの曲線に，ロボットの節が乗るようにするためのサーボモーターの角度の計算方法は他の場所で説明している．
+ここでは，実査によって得られた角度を各モーターに与えてみる．
+やることは，複数のサーボモーターの制御と同じ．
+
+
+[./demo2_move_multiple_servos_lighthill.py#L1](./demo2_move_multiple_servos_lighthill.py#L1)
 
 
 ---

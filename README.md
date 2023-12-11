@@ -16,3 +16,4 @@
     - [⚙️準備](./example_ServoMotor/README.md#⚙️準備)
     - [⚙️例）サーボモーター1つの制御](./example_ServoMotor/README.md#⚙️例）サーボモーター1つの制御)
     - [⚙️例）複数のサーボモーターの制御](./example_ServoMotor/README.md#⚙️例）複数のサーボモーターの制御)
+    - [⚙️ライトヒルのロボットの制御](./example_ServoMotor/README.md#⚙️ライトヒルのロボットの制御)
