@@ -1,4 +1,4 @@
-'''DOC_EXTRACT servomotor
+'''DOC_EXTRACT 0_1_servomotor
 
 ## 例）複数のサーボモーターの制御
 

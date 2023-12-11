@@ -1,4 +1,4 @@
-'''DOC_EXTRACT servomotor
+'''DOC_EXTRACT 0_0_servomotor
 
 # サーボモーターの制御
 
