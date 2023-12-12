@@ -107,6 +107,8 @@ from lib.servomotor.servomotor import servomotor
 ここでは，実査によって得られた角度を各モーターに与えてみる．
 やることは，複数のサーボモーターの制御と同じ．
 
+![sample_lighthill.gif](sample_lighthill.gif)
+
 
 [./demo2_move_multiple_servos_lighthill.py#L1](./demo2_move_multiple_servos_lighthill.py#L1)
 
