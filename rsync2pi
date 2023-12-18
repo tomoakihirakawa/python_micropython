@@ -1,6 +1,0 @@
-#!/bin/bash
-
-remote='pi@10.0.1.19:/home/pi/research/python_micropython'
-local='/Users/tomoaki/Dropbox/code/python_micropython'
-
-rsync --update -vr --exclude "CMake*" --exclude "main" --exclude "*.mov" --exclude "*.nb" --exclude "*.vtu" --exclude "*.key" --exclude "*.avi" --exclude "*.gif" --exclude "*.vtp" ${local}/* ${remote}/
