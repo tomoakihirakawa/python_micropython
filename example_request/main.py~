@@ -1,0 +1,40 @@
+import requests
+import json
+import matplotlib.pyplot as plt
+
+
+resp = requests.get("http://10.0.1.12/ak8963.py")
+
+
+########################
+
+# import requests
+# import json
+# import matplotlib.pyplot as plt
+
+
+# # resp = requests.get("http://127.0.0.1:8000/python/example_request/requestme")
+# # text = resp.text
+
+# # dict = json.loads(text)
+
+
+# outF = open("requestme", "w")
+# outF.write("{")
+# for i in range(1):
+#   # write line to output file
+#   outF.write("\"x\":[1,2,3,4],")
+#   outF.write("\n")  
+#   outF.write("\"y\":[1,2,3,4],")  
+#   outF.write("\n")
+
+# outF.write("}")
+# outF.close()
+
+# # for i in range(10):
+# #     plt.title(i)
+# #     plt.plot(dict["x"],dict["y"])
+# #     plt.draw()
+# #     plt.pause(0.1)
+# #     plt.clf()
+
