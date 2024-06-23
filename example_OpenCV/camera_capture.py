@@ -43,5 +43,5 @@ def capture_camera_frames(interval=1, max_frames=10):
     return frames
 
 if __name__ == "__main__":
-    frames = capture_camera_frames(interval=1, max_frames=10)
+    frames = capture_camera_frames(interval=0.1, max_frames=10000)
     print("Captured frames:", len(frames))
