@@ -30,25 +30,13 @@ def find_available_cameras():
             cap.release()
     return available_cameras
 
-def extract_red_color(frame):
+def extract_color(frame, HSV_vec = [60, 162, 152], range_vec = [20, 70, 70]):
     # Convert the image from BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    # Define the range of red color in HSV
-    # lower_red1 = np.array([0, 70, 50])
-    # upper_red1 = np.array([10, 255, 255])
-    # lower_red2 = np.array([170, 70, 50])
-    # upper_red2 = np.array([180, 255, 255])
-
-    # define for green
-
-    green = [60, 162, 152]
-    lower_green = np.array([green[0] - 20, green[1] - 70, green[2] - 70])
-    upper_green = np.array([green[0] + 20, green[1] + 70, green[2] + 70])
-    # why 40 to 80? because green is between 40 to 80 in HSV
-    # why 70 to 255? because green is between 70 to 255 in HSV
-    # why 50 to 255? because green is between 50 to 255 in HSV
-    # what is the center of green? 60, 162, 152
+    # Define the range of red color in HSV    
+    lower_green = np.array(HSV_vec) - np.array(range_vec)
+    upper_green = np.array(HSV_vec) + np.array(range_vec)
     
     # Threshold the HSV image to get only red colors
     mask1 = cv2.inRange(hsv, lower_green, upper_green)
@@ -62,7 +50,6 @@ def extract_red_color(frame):
     kernel = np.ones((10, 10), np.uint8)
     dilation = cv2.dilate(mask, kernel, iterations=2)
     mask = cv2.morphologyEx(cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel), cv2.MORPH_CLOSE, kernel)
-
 
     return res, mask
 
@@ -79,7 +66,7 @@ def capture_camera_frames(interval=1, max_frames=10, camera_index=1):
     for _ in range(max_frames):
         # Capture frame-by-frame
         ret, frame = cap.read()
-        frame = extract_red_color(frame)[0]
+        frame = extract_color(frame, [60, 162, 152], [200, 100, 100])[0]
         if not ret:
             print("Error: Could not read frame.")
             break
