@@ -1,5 +1,5 @@
 
-'''DOC_EXTRACT
+'''DOC_EXTRACT k
 
 OpenCVでは，HSV（Hue, Saturation, Value）色空間を使用して画像の色を定義できる．
 Hue(色相)は色を表し，Saturation(彩度)は色の鮮やかさを表し，Value(明度)は色の明るさを表す．

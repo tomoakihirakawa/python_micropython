@@ -2,10 +2,13 @@
 
 ## [example_PlotRealTime](./example_PlotRealTime/README.md)
 
-## [example_ultrasonic_sistance_sensor](./example_ultrasonic_sistance_sensor/README.md)
+## [example_OpenCV](./example_OpenCV/README.md)
 
-- [Contents](./example_ultrasonic_sistance_sensor/README.md#Contents)
-- [🤖HC-SR04 or JSN-SR04 Ultrasonic Sensor with Raspberry Pi 5](./example_ultrasonic_sistance_sensor/README.md#🤖HC-SR04-or-JSN-SR04-Ultrasonic-Sensor-with-Raspberry-Pi-5)
+- [Contents](./example_OpenCV/README.md#Contents)
+## [example_DistanceSensor](./example_DistanceSensor/README.md)
+
+- [Contents](./example_DistanceSensor/README.md#Contents)
+- [🤖HC-SR04 or JSN-SR04 Ultrasonic Sensor with Raspberry Pi 5](./example_DistanceSensor/README.md#🤖HC-SR04-or-JSN-SR04-Ultrasonic-Sensor-with-Raspberry-Pi-5)
 ## [example_AHRS](./example_AHRS/README.md)
 
 - [AHRS](./example_AHRS/README.md#AHRS)
