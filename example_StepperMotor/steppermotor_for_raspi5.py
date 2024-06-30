@@ -115,7 +115,7 @@ if __name__ == "__main__":
     thread_process_loop = threading.Thread(target=sinOmega1, args=(motor,))
     thread_process_loop.start()
 
-    """DOC_EXTRACT
+    '''DOC_EXTRACT
     ### 説明
 
     #### `StepperMotor` クラス
@@ -153,4 +153,4 @@ if __name__ == "__main__":
     2. GPIOチップ番号とピン番号は，ハードウェア構成に応じて調整する．
 
     これにより，Raspberry Piを使用したステッピングモーターの制御が効率的に行えるようになる．
-    """
+    '''
