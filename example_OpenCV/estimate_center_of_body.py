@@ -1,22 +1,3 @@
-
-'''DOC_EXTRACT k
-
-OpenCVでは，HSV（Hue, Saturation, Value）色空間を使用して画像の色を定義できる．
-Hue(色相)は色を表し，Saturation(彩度)は色の鮮やかさを表し，Value(明度)は色の明るさを表す．
-値の範囲は，Hueは0〜179，SaturationとValueは0〜255である．
-
-H（色相）：0から179
-S（彩度）：0から255
-V（明度）：0から255
-
-| 色 | Hueの範囲 |
-|---|---|
-| 赤 | 0〜10, 170〜180 |
-| 緑 | 40〜80 |
-| 青 | 100〜140 |
- 
-'''
-
 import cv2
 import numpy as np
 import time
@@ -30,7 +11,7 @@ def find_available_cameras():
             cap.release()
     return available_cameras
 
-def extract_color(frame, HSV_vec=[60, 162, 152], range_vec=[20, 70, 70]):
+def extract_color_and_find_centroid(frame, HSV_vec=[60, 162, 152], range_vec=[20, 70, 70]):
     # Convert the image from BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -49,9 +30,23 @@ def extract_color(frame, HSV_vec=[60, 162, 152], range_vec=[20, 70, 70]):
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
-    return res, mask
+    # Find contours and calculate the centroid
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        c = max(contours, key=cv2.contourArea)
+        M = cv2.moments(c)
+        if M["m00"] != 0:
+            cx = int(M["m10"] / M["m00"])
+            cy = int(M["m01"] / M["m00"])
+            centroid = (cx, cy)
+        else:
+            centroid = None
+    else:
+        centroid = None
 
-def capture_camera_frames(interval=1, max_frames=10, camera_index=1):
+    return res, mask, centroid
+
+def capture_camera_frames(interval=1, max_frames=10, camera_index=1, HSV_vec=[60, 162, 152], range_vec=[30, 70, 70]):
     # Open the camera with the specified index
     cap = cv2.VideoCapture(camera_index)
     
@@ -68,8 +63,13 @@ def capture_camera_frames(interval=1, max_frames=10, camera_index=1):
             print("Error: Could not read frame.")
             break
 
-        # Extract the target color
-        frame, mask = extract_color(frame, [120, 162, 152], [20, 100, 200])
+        # Extract the target color and find the centroid
+        frame, mask, centroid = extract_color_and_find_centroid(frame, HSV_vec, range_vec)
+
+        # Draw the centroid on the frame
+        if centroid:
+            cv2.circle(frame, centroid, 5, (0, 255, 0), -1)
+            cv2.putText(frame, f"Centroid: {centroid}", (centroid[0] + 10, centroid[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         # Append the frame array to the list of frames
         frames.append(frame)
@@ -93,6 +93,6 @@ def capture_camera_frames(interval=1, max_frames=10, camera_index=1):
 if __name__ == "__main__":
     cameras = find_available_cameras()
     if cameras:
-        frames = capture_camera_frames(interval=0.0001, max_frames=10000, camera_index=cameras[0])
+        frames = capture_camera_frames(interval=0.001, max_frames=10000, camera_index=cameras[0])
     else:
         print("Error: No cameras available.")
