@@ -8,7 +8,7 @@
 それに基づき，OpenCVを使用して，リアルタイムでカメラ映像をマスク処理を行い．
 その結果をリアルタイムで確認することができる
 
-![HSV Picker](./images/hsv_picker.png)
+![HSV Picker](./hsv_picker.png)
 
 '''
 
