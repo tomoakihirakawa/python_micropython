@@ -1,17 +1,19 @@
 # Contents
 
 - [🤖OpenCV](#🤖OpenCV)
-    - [⚙️HSV Picker](#⚙️HSV-Picker)
+    - [⚙️HSV Picker（映像のHSV色空間を確認できる）](#⚙️HSV-Picker（映像のHSV色空間を確認できる）)
 
 
 ---
 # 🤖OpenCV 
 
-## ⚙️HSV Picker 
+## ⚙️HSV Picker（映像のHSV色空間を確認できる） 
 
 トラックバーを使ってHSV色空間の各パラメータを調整し，
-それに基づき，OpenCVを使用して，リアルタイムでカメラ映像をマスク処理を行い．
-その結果をリアルタイムで確認することができる
+それに基づき，カメラ映像のマスク処理を行う．
+カメラに映る物体のHSV色空間パラメタを確認することができる．
+
+![HSV Picker](hsv_picker.png)
 
 
 [./HSV_picker.py#L1](./HSV_picker.py#L1)
