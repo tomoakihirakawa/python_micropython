@@ -1,3 +1,60 @@
+'''DOC_EXTRACT PCA9685
+
+## PCA9685
+
+* PWMの周波数を生成するようPCA9685を設定する方法
+* デューティーサイクルを決める，PWMパルスのオンとオフのタイミングを指定する方法
+
+### PCA9685の周波数を50Hz用に設定する（1/50sに4096のパルスが入るようにprescaleを設定）
+
+PCA9685の内部クロック周波数は25MHz．
+PWM周期$`T_{\rm PWM}`$の中に4096個のステップが入るようにprescale, $p$を設定する．
+いいかえると，1秒間に$`4096/T_{\rm PWM}=4096 f_{\rm PWM}`$回のステップがはいるようにPCA9685のクロックを設定する．
+これには，以下の式を満たすようにprescaleを設定すればよいことがわかる．
+
+```math
+\begin{align*}
+4096 f_{\rm PWM} &= 25M / (p+1)\\
+\rightarrow p &= \frac{25M}{4096 f_{\rm PWM}} - 1
+\end{align*}
+```
+
+prescaleは整数でなければならないので，`round`で四捨五入する．
+
+### PWMパルスのオンとオフのタイミングを指定する
+
+多くの場合，
+設定したい[パルス幅[s],角度]の情報をもとに，パルス幅[s]をステップ<4096に変換して，PCA9685に送る．
+パルス幅$`\Delta t`$をステップ数に変換するには，
+
+#### MG996R
+
+| パルス幅 (s) | 角度 |
+|---|---|
+| 1.0 ms | 0° |
+| 1.5 ms | 90° |
+| 2.0 ms | 180° |
+
+#### DS3218
+
+| パルス幅 (s) | 角度 |
+|---|---|
+| 0.5 ms | 0° |
+| 1.5 ms | 90° |
+| 2.5 ms | 180° |
+
+#### HS-5086WP
+
+| パルス幅 (s) | 角度 |
+|---|---|
+| 0.9 ms | 0° |
+| 1.5 ms | 90° |
+| 2.1 ms | 180° |
+
+$`4096 * \Delta t / T_{\rm PWM}`$を計算すればよい．
+
+'''
+
 
 try:
     # microptyhonの場合
@@ -78,16 +135,19 @@ class PCA9685:
         write_byte_data(self.bus, self.address, MODE1, mode1)
         time.sleep(0.005)  # wait for oscillator
 
+
     def set_pwm_freq(self, freq_hz):
         """Set the PWM frequency to the provided value in hertz."""        
-        oldmode = read_byte_data(self.bus, self.address, MODE1, 1)
+        oldmode = read_byte_data(self.bus, self.address, MODE1, 1)[0]  # リストの最初の要素を取得
         oldmode = oldmode & 0xFF
-        newmode = (oldmode & 0x7F) | 0x10    # sleep
+        newmode = (oldmode & 0x7F) | 0x10  # sleep
         write_byte_data(self.bus, self.address, MODE1, newmode)  # go to sleep
-        write_byte_data(self.bus, self.address, PRESCALE, round(25000000.0 / (4096.0 * float(freq_hz))) - 1.)
+        prescale_value = round(25000000.0 / (4096.0 * float(freq_hz))) - 1
+        write_byte_data(self.bus, self.address, PRESCALE, prescale_value)
         write_byte_data(self.bus, self.address, MODE1, oldmode)
         time.sleep(0.005)
         write_byte_data(self.bus, self.address, MODE1, oldmode | 0x80)
+
 
     def set_pwm(self, channel, on, off):
         """Sets a single PWM channel."""
@@ -112,10 +172,6 @@ def example():
         return [min+i*(max-min)/(num-1) for i in range(num)]
 
     class servomotor:
-        """
-        MG996Rの場合，
-        0.4ms
-        """
 
         min_len_deg = [0.0005, 0]
         max_len_deg = [0.0025, 180]
