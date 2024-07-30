@@ -43,7 +43,7 @@ from パッケージ名 import *
 
 \insert{servomotor_calss}
 
-\include{PCA9685}
+\insert{PCA9685}
 
 ## 例）サーボモーター1つの制御
 
