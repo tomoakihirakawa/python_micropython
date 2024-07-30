@@ -38,11 +38,25 @@ prescaleは整数でなければならないので，`round`で四捨五入す�
 
 ### 🔩PWMパルスのオンとオフのタイミングを指定する 
 
-多くの場合，
-設定したい[パルス幅[s],角度]の情報をもとに，パルス幅[s]をステップ<4096に変換して，PCA9685に送る．
-パルス幅$`\Delta t`$をステップ数に変換するには，
+0.5msから1.0msの間にオンなら〜度，のようにサーボモーター毎に決まっている．
+それに応じで，aステップにon，bステップにoff，というように指定する．
+
+0.5msをステップ数に変換するには，$`4096 \frac{0.5}{T _{\rm pwd}}`$とすればよい．ここで，$`T _{\rm pwd}`$は`set_pwm_freq`で設定した周波数の逆数である．
+
+```python
+def set_pwm(self, channel, on, off):
+"""Sets a single PWM channel."""
+write_byte_data(self.bus, self.address, LED0_ON_L+4*channel, on & 0xFF)
+write_byte_data(self.bus, self.address, LED0_ON_H+4*channel, on >> 8)
+write_byte_data(self.bus, self.address, LED0_OFF_L+4*channel, off & 0xFF)
+write_byte_data(self.bus, self.address, LED0_OFF_H+4*channel, off >> 8)
+```
+
+モーターの角度からpwmを決めるには，角度をまずパルスオン，オフの時刻に変換し，それをステップ数に変換して，`set_pwm`で指定する．
 
 #### 🚀 MG996R 
+
+onのタイミングは0ms．
 
 | パルス幅 (s) | 角度 |
 |---|---|
@@ -52,21 +66,23 @@ prescaleは整数でなければならないので，`round`で四捨五入す�
 
 #### 🚀 DS3218 
 
+onのタイミングが，0.5msから始まるので注意．
+
 | パルス幅 (s) | 角度 |
 |---|---|
-| 0.5 ms | 0° |
-| 1.5 ms | 90° |
-| 2.5 ms | 180° |
+| 0.5-1. ms | 0° |
+| 0.5-1.5 ms | 90° |
+| 0.5-2.5 ms | 180° |
 
 #### 🚀 HS-5086WP 
+
+onのタイミングは0ms．
 
 | パルス幅 (s) | 角度 |
 |---|---|
 | 0.9 ms | 0° |
 | 1.5 ms | 90° |
 | 2.1 ms | 180° |
-
-$`4096 * \Delta t / T _{\rm PWM}`$を計算すればよい．
 
 [./PCA9685/PCA9685.py#L1](./PCA9685/PCA9685.py#L1)
 
