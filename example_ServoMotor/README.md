@@ -3,9 +3,9 @@
 - [🤖サーボモーターの制御](#🤖サーボモーターの制御)
     - [⚙️準備](#⚙️準備)
         - [🔩🔩servomotorクラス](#🔩🔩servomotorクラス)
+        - [🔩🔩MG996R](#🔩🔩MG996R)
     - [⚙️例）サーボモーター1つの制御](#⚙️例）サーボモーター1つの制御)
     - [⚙️例）複数のサーボモーターの制御](#⚙️例）複数のサーボモーターの制御)
-    - [⚙️ライトヒルのロボットの制御](#⚙️ライトヒルのロボットの制御)
     - [⚙️ライトヒルのロボットの制御](#⚙️ライトヒルのロボットの制御)
 
 
@@ -66,9 +66,20 @@ s = servomotor(0, 90)
 s.setDegree(180)
 ```
 
-[../lib/servomotor/servomotor.py#L10](../lib/servomotor/servomotor.py#L10)
+### 🔩🔩MG996R  
+
+6Vで11kgf-cmのトルクを持つ．
+$`\plusmn 60^\circ`$の範囲で動作する．
+
+PWM周期は20ms，つまり周波数は1/20=50Hz．
+
+1.5msのパルス幅で中立位置，0.5msで最小角度，2.5msで最大角度．
+
+[../lib/servomotor/servomotor20240730.py#L10](../lib/servomotor/servomotor20240730.py#L10)
 
 
+
+\include{PCA9685}
 
 ## ⚙️例）サーボモーター1つの制御 
 
@@ -112,18 +123,6 @@ from lib.servomotor.servomotor import servomotor
 
 
 [./demo2_move_multiple_servos_lighthill.py#L1](./demo2_move_multiple_servos_lighthill.py#L1)
-
-
-## ⚙️ライトヒルのロボットの制御 
-
-ライトヒルの曲線に，ロボットの節が乗るようにするためのサーボモーターの角度の計算方法は他の場所で説明している．
-ここでは，実査によって得られた角度を各モーターに与えてみる．
-やることは，複数のサーボモーターの制御と同じ．
-
-![sample_lighthill.gif](sample_lighthill.gif)
-
-
-[./demo2_move_multiple_servos_lighthill_power.py#L1](./demo2_move_multiple_servos_lighthill_power.py#L1)
 
 
 ---

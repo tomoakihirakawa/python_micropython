@@ -15,6 +15,7 @@
 - [Contents](./example_OpenCV/README.md#Contents)
 - [🤖OpenCV](./example_OpenCV/README.md#🤖OpenCV)
     - [⚙️HSV Picker（映像のHSV色空間を確認できる）](./example_OpenCV/README.md#⚙️HSV-Picker（映像のHSV色空間を確認できる）)
+    - [⚙️デュアルカメラについて](./example_OpenCV/README.md#⚙️デュアルカメラについて)
 ## [example_DistanceSensor](./example_DistanceSensor/README.md)
 
 - [Contents](./example_DistanceSensor/README.md#Contents)
@@ -33,5 +34,4 @@
     - [⚙️準備](./example_ServoMotor/README.md#⚙️準備)
     - [⚙️例）サーボモーター1つの制御](./example_ServoMotor/README.md#⚙️例）サーボモーター1つの制御)
     - [⚙️例）複数のサーボモーターの制御](./example_ServoMotor/README.md#⚙️例）複数のサーボモーターの制御)
-    - [⚙️ライトヒルのロボットの制御](./example_ServoMotor/README.md#⚙️ライトヒルのロボットの制御)
     - [⚙️ライトヒルのロボットの制御](./example_ServoMotor/README.md#⚙️ライトヒルのロボットの制御)
