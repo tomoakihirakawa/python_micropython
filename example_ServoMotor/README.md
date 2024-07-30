@@ -91,12 +91,8 @@ PWM周期$`T _{\rm PWM}`$の中に4096個のステップが入るようにpresca
 これには，以下の式を満たすようにprescaleを設定すればよいことがわかる．
 
 ```math
-\begin{equation}
-\begin{aligned}
 4096 f _{\rm PWM} &= 25M / (prescale+1)\\
 \rightarrow prescale &= \frac{25M}{4096 f _{\rm PWM}} - 1
-\begin{aligned}
-\begin{equation}
 ```
 [../lib/PCA9685/PCA9685.py#L1](../lib/PCA9685/PCA9685.py#L1)
 

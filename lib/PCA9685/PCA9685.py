@@ -13,12 +13,8 @@ PWM周期$`T_{\rm PWM}`$の中に4096個のステップが入るようにprescal
 これには，以下の式を満たすようにprescaleを設定すればよいことがわかる．
 
 ```math
-\begin{equation}
-\begin{aligned}
 4096 f_{\rm PWM} &= 25M / (prescale+1)\\
 \rightarrow prescale &= \frac{25M}{4096 f_{\rm PWM}} - 1
-\begin{aligned}
-\begin{equation}
 ```
 
 '''
