@@ -115,6 +115,10 @@ class PCA9685:
     """PCA9685 PWM LED/servo controller."""
 
     def __init__(self, address=PCA9685_ADDRESS, i2c=None):
+        self.bit = 12
+        self.decimal = 2**self.bit  # 4096
+        self.freq = 50.
+        self.osc_clock = 25 * 10**6
         self.address = address
         """Initialize the PCA9685."""
         # Setup I2C interface for the device.
@@ -137,24 +141,26 @@ class PCA9685:
         write_byte_data(self.bus, self.address, MODE1, mode1)
         time.sleep(0.005)  # wait for oscillator
 
-
     def set_pwm_freq(self, freq_hz):
         """Set the PWM frequency to the provided value in hertz."""        
+        self.freq = freq_hz
         oldmode = read_byte_data(self.bus, self.address, MODE1, 1)[0]  # リストの最初の要素を取得
         oldmode = oldmode & 0xFF
         newmode = (oldmode & 0x7F) | 0x10  # sleep
         write_byte_data(self.bus, self.address, MODE1, newmode)  # go to sleep
-        prescale_value = round(25000000.0 / (4096.0 * float(freq_hz))) - 1
+        prescale_value = round(self.osc_clock / (self.decimal * self.freq)) - 1
         write_byte_data(self.bus, self.address, PRESCALE, prescale_value)
         write_byte_data(self.bus, self.address, MODE1, oldmode)
         time.sleep(0.005)
         write_byte_data(self.bus, self.address, MODE1, oldmode | 0x80)
 
-
-    def set_pwm_offonly(self, channel, off):
+    def set_pwm_on(self, channel, on):
         """Sets a single PWM channel."""
         write_byte_data(self.bus, self.address, LED0_ON_L+4*channel, on & 0xFF)
         write_byte_data(self.bus, self.address, LED0_ON_H+4*channel, on >> 8)
+
+    def set_pwm_off(self, channel, off):
+        """Sets a single PWM channel."""
         write_byte_data(self.bus, self.address, LED0_OFF_L+4*channel, off & 0xFF)
         write_byte_data(self.bus, self.address, LED0_OFF_H+4*channel, off >> 8)
 

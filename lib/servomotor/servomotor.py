@@ -42,7 +42,8 @@ PWM周期は20ms，つまり周波数は1/0.02=0.5*10^2=50Hz．
 
 class MG996R:
 
-    def __init__(self, ch_IN):
+    def __init__(self, ch_IN, pwm):
+        self.pwm = pwm
 
         self.ms0 = 0.5 # 0.5ms
         self.deg0 = 0.
@@ -50,17 +51,16 @@ class MG996R:
         self.ms1 = 2.5 # 2.5ms
         self.deg1 = 180.
 
-        self.freq = 60.
-        self.pwm = PCA9685(address=0x40)
-        self.pwm.set_pwm_freq(self.freq)
 
         self.ch = ch_IN
 
-        self.coeff = 4096. * self.freq / 1000. # 1000はmsをsに変換するため
+        self.coeff = self.pwm.decimal * self.pwm.freq / 1000. # 1000はmsをsに変換するため
+
+        self.pwm.set_pwm_on(self.ch, 0)
 
     def setDegree(self, deg):
         a = deg/180.
-        self.pwm.set_pwm_offonly(self.ch, round(self.coeff * (a * self.ms1 +  (1. - a) * self.ms0)))
+        self.pwm.set_pwm_off(self.ch, round(self.coeff * (a * self.ms1 +  (1. - a) * self.ms0)))
 
     def __del__(self):
         print(f"MG996R object on channel {self.ch} is being deleted")
@@ -70,7 +70,8 @@ class MG996R:
 
 class DS3218:
 
-    def __init__(self, ch_IN, mode='180'):
+    def __init__(self, ch_IN, pwm,  mode='180'):
+        self.pwm = pwm
 
         self.offset = 0.5 # 0.5ms
 
@@ -93,19 +94,17 @@ class DS3218:
 
         self.ch = ch_IN
 
-        self.coeff = 4096. * self.freq / 1000. # 1000はmsをsに変換するため
+        self.coeff = self.pwm.decimal * self.pwm.freq / 1000. # 1000はmsをsに変換するため
+
+        self.pwm.set_pwm_on(self.ch, round(self.coeff * self.offset))
 
     def setDegree(self, deg):
         if deg < 90:
             a = deg / 90.
-            self.pwm.set_pwm(self.ch, 
-                             round(self.coeff * self.offset), 
-                             round(self.coeff * ((1. - a) * self.ms0 + a * self.ms1)))
+            self.pwm.set_pwm_off(self.ch,  round(self.coeff * ((1. - a) * self.ms0 + a * self.ms1)))
         else:
             a = deg/90. - 1.
-            self.pwm.set_pwm(self.ch, 
-                             round(self.coeff * self.offset), 
-                             round(self.coeff * ((1. - a) * self.ms1 + a * self.ms2)))        
+            self.pwm.set_pwm_off(self.ch, round(self.coeff * ((1. - a) * self.ms1 + a * self.ms2)))
 
     def __del__(self):
         print(f"DS3218 object on channel {self.ch} is being deleted")
@@ -114,7 +113,8 @@ class DS3218:
 
 class HS5086WP:
 
-    def __init__(self, ch_IN):
+    def __init__(self, ch_IN, pwm):
+        self.pwm = pwm
 
         self.ms0 = 0.9
         self.deg0 = 0.
@@ -128,11 +128,13 @@ class HS5086WP:
 
         self.ch = ch_IN
 
-        self.coeff = 4096. * self.freq / 1000. # 1000はmsをsに変換するため
+        self.coeff = self.pwm.decimal * self.pwm.freq / 1000. # 1000はmsをsに変換するため
+
+        self.pwm.set_pwm_on(self.ch, 0)
 
     def setDegree(self, deg):
         a = deg/180.
-        self.pwm.set_pwm_offonly(self.ch, round(self.coeff * (a * self.ms1 +  (1. - a) * self.ms0)))
+        self.pwm.set_pwm_off(self.ch, round(self.coeff * (a * self.ms1 +  (1. - a) * self.ms0)))
 
     def __del__(self):
         print(f"HS5086WP object on channel {self.ch} is being deleted")
