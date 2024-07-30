@@ -22,6 +22,7 @@
 			"activityBar.background": "#3B2B0D",
 			"titleBar.activeBackground": "#523C12",
 			"titleBar.activeForeground": "#FDF9F4"
-		}
+		},
+		"editor.wordWrapColumn": 200
 	}
 }

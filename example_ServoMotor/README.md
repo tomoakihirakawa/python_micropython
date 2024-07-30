@@ -1,5 +1,4 @@
 # Contents
-
 - [🤖サーボモーターの制御](#🤖サーボモーターの制御)
     - [⚙️準備](#⚙️準備)
         - [🔩🔩servomotorクラス](#🔩🔩servomotorクラス)
@@ -74,9 +73,7 @@ $`\plusmn 60^\circ`$の範囲で動作する．
 PWM周期は20ms，つまり周波数は1/20=50Hz．
 
 1.5msのパルス幅で中立位置，0.5msで最小角度，2.5msで最大角度．
-
 [../lib/servomotor/servomotor20240730.py#L10](../lib/servomotor/servomotor20240730.py#L10)
-
 
 
 \include{PCA9685}
@@ -98,9 +95,7 @@ from lib.servomotor.servomotor import servomotor
 
 ![](sample.gif)
 
-
 [./demo0_move_servo.py#L1](./demo0_move_servo.py#L1)
-
 
 ---
 ## ⚙️例）複数のサーボモーターの制御 
@@ -108,9 +103,7 @@ from lib.servomotor.servomotor import servomotor
 やり方は，サーボモーター一つの場合と同じ．
 これは，配列にサーボモーターのインスタンスを格納して実行した例．
 
-
 [./demo1_move_multiple_servos.py#L1](./demo1_move_multiple_servos.py#L1)
-
 
 ---
 ## ⚙️ライトヒルのロボットの制御 
@@ -121,8 +114,6 @@ from lib.servomotor.servomotor import servomotor
 
 ![sample_lighthill.gif](sample_lighthill.gif)
 
-
 [./demo2_move_multiple_servos_lighthill.py#L1](./demo2_move_multiple_servos_lighthill.py#L1)
-
 
 ---
