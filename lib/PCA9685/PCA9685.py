@@ -1,3 +1,32 @@
+'''DOC_EXTRACT PCA9685
+
+## PCA9685
+
+PCA9685は，12bitのPWMコントローラなので，各PWM周期は4096個のステップに分割され，どのタイミングでON/OFFするかを指定できる．
+
+抑えておきたいのは，
+
+* PWMの周波数を生成するようPCA9685を設定する方法
+* デューティーサイクルを決める，PWMパルスのオンとオフのタイミングを指定する方法
+
+### 50Hzを作る
+
+PCA9685内部クロック周波数は25MHz．
+PWM周期$`T_{\rm PWM}`$の中に4096個のステップが入るようにprescaleを設定する．
+いいかえると，1秒間に$`4096/T_{\rm PWM}=4096 f_{\rm PWM}`$回のステップがはいるようにPCA9685のクロックを設定する．
+これには，以下の式を満たすようにprescaleを設定すればよいことがわかる．
+
+```math
+\begin{equation}
+\begin{aligned}
+4096 f_{\rm PWM} &= 25M / (prescale+1)\\
+\rightarrow prescale &= \frac{25M}{4096 f_{\rm PWM}} - 1
+\begin{end}
+\begin{end}
+```
+
+'''
+
 
 try:
     # microptyhonの場合
@@ -49,7 +78,7 @@ RESTART = 0x80
 SLEEP = 0x10
 ALLCALL = 0x01
 INVRT = 0x10
-OUTDRV = 0x04
+OUTDRV = 0x04 
 
 
 class PCA9685:
@@ -79,17 +108,12 @@ class PCA9685:
         time.sleep(0.005)  # wait for oscillator
 
     def set_pwm_freq(self, freq_hz):
-        """Set the PWM frequency to the provided value in hertz."""
-        prescaleval = 25000000.0    # 25MHz
-        prescaleval /= 4096.0       # 12-bit
-        prescaleval /= float(freq_hz)
-        prescaleval -= 1.0
-        prescale = round(prescaleval)
-        oldmode, = read_byte_data(self.bus, self.address, MODE1, 1)
+        """Set the PWM frequency to the provided value in hertz."""        
+        oldmode = read_byte_data(self.bus, self.address, MODE1, 1)
         oldmode = oldmode & 0xFF
         newmode = (oldmode & 0x7F) | 0x10    # sleep
         write_byte_data(self.bus, self.address, MODE1, newmode)  # go to sleep
-        write_byte_data(self.bus, self.address, PRESCALE, prescale)
+        write_byte_data(self.bus, self.address, PRESCALE, round(25000000.0 / (4096.0 * float(freq_hz))) - 1.)
         write_byte_data(self.bus, self.address, MODE1, oldmode)
         time.sleep(0.005)
         write_byte_data(self.bus, self.address, MODE1, oldmode | 0x80)
@@ -98,8 +122,7 @@ class PCA9685:
         """Sets a single PWM channel."""
         write_byte_data(self.bus, self.address, LED0_ON_L+4*channel, on & 0xFF)
         write_byte_data(self.bus, self.address, LED0_ON_H+4*channel, on >> 8)
-        write_byte_data(self.bus, self.address,
-                        LED0_OFF_L+4*channel, off & 0xFF)
+        write_byte_data(self.bus, self.address, LED0_OFF_L+4*channel, off & 0xFF)
         write_byte_data(self.bus, self.address, LED0_OFF_H+4*channel, off >> 8)
 
     def set_all_pwm(self, on, off):
@@ -133,19 +156,22 @@ def example():
             self.freq = 50.
             self.pwm.set_pwm_freq(50.)
 
-            self.min_pulse = self.min_len_deg[0] / \
-                ((1./self.freq)/(2.**12))  # 0 deg
-            self.max_pulse = self.max_len_deg[0] / \
-                ((1./self.freq)/(2.**12))  # 180deg
-            self.pulse_range = self.max_pulse - self.min_pulse
+
+            # 0.5ms * 50Hz * 4096 bit = 1024 pulse            
+            self.min_pulse = 4096. * self.min_len_deg[0] * self.freq
+            # 2.5ms * 50Hz * 4096 bit = 5120 pulse
+            self.max_pulse = 4096. * self.max_len_deg[0] * self.freq
+            self.pulse_range = 4096. * (self.max_len_deg[0] - self.min_len_deg[0]) * self.freq
 
         # def setPWM(self, p):
         #     self.pwm.set_pwm(self.ch, 0, int((650.-150.)*p/180.+150+self.offset))
 
         def setDegree(self, deg):
             #!roundを使うべき
-            self.pwm.set_pwm(self.ch, 0, round(
-                self.min_pulse + self.pulse_range*(deg/180.)))
+
+            a = (deg/180.)
+            pulse = round(4096. * self.freq * (a * self.max_len_deg[0] + (1. - a) * self.min_len_deg[0]))
+            self.pwm.set_pwm(self.ch, 0, pulse)
 
         def setDegreeByTime(self, min, max, elapsedtime, step=300):
             start = time.time()

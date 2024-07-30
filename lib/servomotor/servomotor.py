@@ -24,14 +24,18 @@ s = servomotor(0, 90)
 s.setDegree(180)
 ```
 
+### MG996R
+
+6Vで11kgf-cmのトルクを持つ．
+$`\plusmn 60^\circ`$の範囲で動作する．
+
+PWM周期は20ms，つまり周波数は1/20=50Hz．
+
+1.5msのパルス幅で中立位置，0.5msで最小角度，2.5msで最大角度．
+
 '''
 
-
 class servomotor:
-    """
-    MG996Rの場合，
-    0.4ms
-    """
 
     min_len_deg = [0.0005, 0]
     max_len_deg = [0.0025, 180]

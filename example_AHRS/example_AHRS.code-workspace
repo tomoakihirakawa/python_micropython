@@ -1,0 +1,27 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"editor.selectionHighlightBackground": "#ffffff00",
+			"editor.findMatchHighlightBackground": "#ffffff00",
+			"editor.findMatchBorder": "#ffff00",
+			"editor.findMatchHighlightBorder": "#ff0000",
+			"editor.selectionHighlightBorder": "#ffffff",
+			"editor.lineHighlightBorder": "#272727",
+			"editor.selectionBackground": "#771835",
+			"editor.wordHighlightBackground": "#771835",
+			"editorCursor.foreground": "#00ff00",
+			"editor.lineHighlightBackground": "#181818",
+			"editor.findMatchBackground": "#000000",
+			"statusBar.debuggingBackground": "#410d18",
+			"statusBar.debuggingForeground": "#dddddd",
+			"activityBar.background": "#3B2B0D",
+			"titleBar.activeBackground": "#523C12",
+			"titleBar.activeForeground": "#FDF9F4"
+		}
+	}
+}
