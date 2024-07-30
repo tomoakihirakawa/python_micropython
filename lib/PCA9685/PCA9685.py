@@ -1,3 +1,62 @@
+'''DOC_EXTRACT PCA9685
+
+# PWM制御を行うためのPCA9685の使い方
+
+## PCA9685
+
+* PWMの周波数を生成するようPCA9685を設定する方法
+* デューティーサイクルを決める，PWMパルスのオンとオフのタイミングを指定する方法
+
+### PCA9685の周波数を50Hz用に設定する（1/50sに4096のパルスが入るようにprescaleを設定）
+
+PCA9685の内部クロック周波数は25MHz．
+PWM周期$`T_{\rm PWM}`$の中に4096個のステップが入るようにprescale, $p$を設定する．
+いいかえると，1秒間に$`4096/T_{\rm PWM}=4096 f_{\rm PWM}`$回のステップがはいるようにPCA9685のクロックを設定する．
+これには，以下の式を満たすようにprescaleを設定すればよいことがわかる．
+
+```math
+\begin{align*}
+4096 f_{\rm PWM} &= 25M / (p+1)\\
+\rightarrow p &= \frac{25M}{4096 f_{\rm PWM}} - 1
+\end{align*}
+```
+
+prescaleは整数でなければならないので，`round`で四捨五入する．
+
+### PWMパルスのオンとオフのタイミングを指定する
+
+多くの場合，
+設定したい[パルス幅[s],角度]の情報をもとに，パルス幅[s]をステップ<4096に変換して，PCA9685に送る．
+パルス幅$`\Delta t`$をステップ数に変換するには，
+
+#### MG996R
+
+| パルス幅 (s) | 角度 |
+|---|---|
+| 1.0 ms | 0° |
+| 1.5 ms | 90° |
+| 2.0 ms | 180° |
+
+#### DS3218
+
+| パルス幅 (s) | 角度 |
+|---|---|
+| 0.5 ms | 0° |
+| 1.5 ms | 90° |
+| 2.5 ms | 180° |
+
+#### HS-5086WP
+
+| パルス幅 (s) | 角度 |
+|---|---|
+| 0.9 ms | 0° |
+| 1.5 ms | 90° |
+| 2.1 ms | 180° |
+
+$`4096 * \Delta t / T_{\rm PWM}`$を計算すればよい．
+
+'''
+
 
 try:
     # microptyhonの場合
@@ -78,16 +137,26 @@ class PCA9685:
         write_byte_data(self.bus, self.address, MODE1, mode1)
         time.sleep(0.005)  # wait for oscillator
 
+
     def set_pwm_freq(self, freq_hz):
         """Set the PWM frequency to the provided value in hertz."""        
-        oldmode = read_byte_data(self.bus, self.address, MODE1, 1)
+        oldmode = read_byte_data(self.bus, self.address, MODE1, 1)[0]  # リストの最初の要素を取得
         oldmode = oldmode & 0xFF
-        newmode = (oldmode & 0x7F) | 0x10    # sleep
+        newmode = (oldmode & 0x7F) | 0x10  # sleep
         write_byte_data(self.bus, self.address, MODE1, newmode)  # go to sleep
-        write_byte_data(self.bus, self.address, PRESCALE, round(25000000.0 / (4096.0 * float(freq_hz))) - 1.)
+        prescale_value = round(25000000.0 / (4096.0 * float(freq_hz))) - 1
+        write_byte_data(self.bus, self.address, PRESCALE, prescale_value)
         write_byte_data(self.bus, self.address, MODE1, oldmode)
         time.sleep(0.005)
         write_byte_data(self.bus, self.address, MODE1, oldmode | 0x80)
+
+
+    def set_pwm_offonly(self, channel, off):
+        """Sets a single PWM channel."""
+        write_byte_data(self.bus, self.address, LED0_ON_L+4*channel, on & 0xFF)
+        write_byte_data(self.bus, self.address, LED0_ON_H+4*channel, on >> 8)
+        write_byte_data(self.bus, self.address, LED0_OFF_L+4*channel, off & 0xFF)
+        write_byte_data(self.bus, self.address, LED0_OFF_H+4*channel, off >> 8)
 
     def set_pwm(self, channel, on, off):
         """Sets a single PWM channel."""
@@ -102,92 +171,3 @@ class PCA9685:
         write_byte_data(self.bus, self.address, ALL_LED_ON_H, on >> 8)
         write_byte_data(self.bus, self.address, ALL_LED_OFF_L, off & 0xFF)
         write_byte_data(self.bus, self.address, ALL_LED_OFF_H, off >> 8)
-
-# -------------------------------------------------------- #
-
-
-def example():
-
-    def Subdivide(min, max, num):
-        return [min+i*(max-min)/(num-1) for i in range(num)]
-
-    class servomotor:
-        """
-        MG996Rの場合，
-        0.4ms
-        """
-
-        min_len_deg = [0.0005, 0]
-        max_len_deg = [0.0025, 180]
-
-        def __init__(self, ch_IN, offset_IN=0):
-            self.ch = ch_IN
-            self.offset = offset_IN
-            self.pwm = PCA9685(address=0x40)
-            self.freq = 50.
-            self.pwm.set_pwm_freq(50.)
-
-
-            # 0.5ms * 50Hz * 4096 bit = 1024 pulse            
-            self.min_pulse = 4096. * self.min_len_deg[0] * self.freq
-            # 2.5ms * 50Hz * 4096 bit = 5120 pulse
-            self.max_pulse = 4096. * self.max_len_deg[0] * self.freq
-            self.pulse_range = 4096. * (self.max_len_deg[0] - self.min_len_deg[0]) * self.freq
-
-        # def setPWM(self, p):
-        #     self.pwm.set_pwm(self.ch, 0, int((650.-150.)*p/180.+150+self.offset))
-
-        def setDegree(self, deg):
-            #!roundを使うべき
-
-            a = (deg/180.)
-            pulse = round(4096. * self.freq * (a * self.max_len_deg[0] + (1. - a) * self.min_len_deg[0]))
-            self.pwm.set_pwm(self.ch, 0, pulse)
-
-        def setDegreeByTime(self, min, max, elapsedtime, step=300):
-            start = time.time()
-            angles = Subdivide(min, max, step)
-            times = Subdivide(0, elapsedtime, step)  # sec
-            for a, t in zip(angles, times):
-                while True:
-                    if time.time() - start >= t:
-                        self.setDegree(a)
-                        break
-
-        def setPWM(self, pwm):
-            self.pwm.set_pwm(self.ch, 0, round(pwm))
-
-        def clean(self):
-            self.setPWM(90)
-            time.sleep(1)
-
-    # -------------------------------------------------------- #
-
-    s = servomotor(0, 0)
-    min = 0
-    max = 180
-
-    s.setDegree(min)
-    time.sleep(1)
-
-    if _MicroPython_:
-        start = time.time_ns()
-    else:
-        start = time.time()
-
-    angles = Subdivide(min, max, 1000)
-    times = Subdivide(0, 10, 1000)  # sec
-    for a, t in zip(angles, times):
-        while True:
-            if _MicroPython_:
-                dt = (time.time_ns() - start) * 10**-9
-            else:
-                dt = time.time() - start
-            if dt >= t:
-                print(a)
-                s.setDegree(a)
-                break
-
-
-if __name__ == '__main__':
-    example()

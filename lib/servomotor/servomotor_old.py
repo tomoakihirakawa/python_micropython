@@ -7,7 +7,7 @@ except:
 
 from ..PCA9685 import PCA9685
 
-'''DOC_EXTRACT servomotor_calss
+'''
 
 ### servomotorクラス
 
@@ -47,8 +47,9 @@ class servomotor:
         self.freq = 60.
         self.pwm.set_pwm_freq(60.)
 
-        self.min_pulse = 4096*self.min_len_deg[0]*self.freq
-        self.max_pulse = 4096*self.max_len_deg[0]*self.freq
+        self.min_pulse = self.min_len_deg[0]/((1./self.freq)/(2.**12))  # 0 deg
+        self.max_pulse = self.max_len_deg[0] / \
+            ((1./self.freq)/(2.**12))  # 180deg
         self.pulse_range = self.max_pulse - self.min_pulse
 
     def setDegree(self, deg):

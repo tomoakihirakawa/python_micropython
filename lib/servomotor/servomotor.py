@@ -9,75 +9,132 @@ from ..PCA9685 import PCA9685
 
 '''DOC_EXTRACT servomotor_calss
 
-### servomotorクラス
+# サーボモーターのクラス
 
-このservomotorクラスは，`servomotor(チャンネル, オフセット角度)`で初期化する．
-例えば，以下のようにすると，チャンネル0のサーボモーターを初期角度90度で初期化できる．
-
-```
-s = servomotor(0, 90)
-```
-
-角度を変更するには，`setDegree`を使う．例えば，以下のようにすると，チャンネル0のサーボモーターの角度を180度に変更できる．
-
-```
-s.setDegree(180)
-```
-
-### MG996R
+## MG996R
 
 6Vで11kgf-cmのトルクを持つ．
 $`\plusmn 60^\circ`$の範囲で動作する．
 
-PWM周期は20ms，つまり周波数は1/20=50Hz．
+PWM周期は20ms，つまり周波数は1/0.02=0.5*10^2=50Hz．
 
 1.5msのパルス幅で中立位置，0.5msで最小角度，2.5msで最大角度．
 
+## DS3218
+
+6Vで20kgf-cmのトルクを持つ．
+$`\plusmn 180^\circ`$または$`\plusmn 270^\circ`$の範囲で動作する．
+
+PWM周期は2.5ms，つまり周波数は1/0.0025=0.4*10^3=400Hz．
+
+0.5-1.5msのパルス幅で中立位置，0.5-1.0msで最小角度，0.5-2.5msで最大角度．
+
+## HS-5086WP
+
+6Vで2.6kgf-cmのトルクを持つ．
+$`\plusmn 60^\circ`$の範囲で動作する．
+
+PWM周期は20ms，つまり周波数は1/0.02=0.5*10^2=50Hz．
+
+0.9msのパルス幅で中立位置，0.5msで最小角度，2.1msで最大角度．
+
 '''
 
-class servomotor:
+class MG996R:
 
-    min_len_deg = [0.0005, 0]
-    max_len_deg = [0.0025, 180]
+    def __init__(self, ch_IN):
 
-    def __init__(self, ch_IN, offset_IN=0):
-        self.ch = ch_IN
-        self.offset = offset_IN
-        self.pwm = PCA9685(address=0x40)
+        self.ms0 = 0.5 # 0.5ms
+        self.deg0 = 0.
+
+        self.ms1 = 2.5 # 2.5ms
+        self.deg1 = 180.
+
         self.freq = 60.
-        self.pwm.set_pwm_freq(60.)
+        self.pwm = PCA9685(address=0x40)
+        self.pwm.set_pwm_freq(self.freq)
 
-        self.min_pulse = self.min_len_deg[0]/((1./self.freq)/(2.**12))  # 0 deg
-        self.max_pulse = self.max_len_deg[0] / \
-            ((1./self.freq)/(2.**12))  # 180deg
-        self.pulse_range = self.max_pulse - self.min_pulse
+        self.ch = ch_IN
+
+        self.coeff = 4096. * self.freq / 1000. # 1000はmsをsに変換するため
 
     def setDegree(self, deg):
-        self.pwm.set_pwm(self.ch, 0, round(self.min_pulse +
-                         self.pulse_range*((deg-self.offset)/180.)))
+        a = deg/180.
+        self.pwm.set_pwm_offonly(self.ch, round(self.coeff * (a * self.ms1 +  (1. - a) * self.ms0)))
 
-    def setDegreeByTime(self, min, max, elapsedtime, step=300):
-        start = time.time()
-        angle_step = (max - min) / (step - 1)
-        time_step = elapsedtime / (step - 1)
+    def __del__(self):
+        print(f"MG996R object on channel {self.ch} is being deleted")
+        self.setDegree(0)
+        time.sleep(0.5)
 
-        for i in range(step):
-            while True:
-                if time.time() - start >= i * time_step:
-                    self.setDegree(min + i * angle_step)
-                    break
 
-    def moveDegree(self, tup):
-        [start, stop, num, slp_time] = tup
-        degree_step = (stop - start) / (num - 1)
+class DS3218:
 
-        for i in range(num):
-            time.sleep_ms(slp_time)
-            self.setDegree(start + i * degree_step)
+    def __init__(self, ch_IN, mode='180'):
 
-    def setPWM(self, pwm):
-        self.pwm.set_pwm(self.ch, 0, round(pwm))
+        self.offset = 0.5 # 0.5ms
 
-    def clean(self):
-        self.setPWM(90)
-        time.sleep(1)
+        self.ms0 = 1. # 1ms
+        self.ms1 = 1.5 # 1.5ms
+        self.ms2 = 2.5 # 2.5ms
+
+        if mode == '180':
+            self.deg0 = 0.
+            self.deg1 = 90.
+            self.deg2 = 180.
+        else:
+            self.deg0 = 0.
+            self.deg1 = 135.
+            self.deg2 = 270.
+
+        self.freq = 60.
+        self.pwm = PCA9685(address=0x40)
+        self.pwm.set_pwm_freq(self.freq)
+
+        self.ch = ch_IN
+
+        self.coeff = 4096. * self.freq / 1000. # 1000はmsをsに変換するため
+
+    def setDegree(self, deg):
+        if deg < 90:
+            a = deg / 90.
+            self.pwm.set_pwm(self.ch, 
+                             round(self.coeff * self.offset), 
+                             round(self.coeff * ((1. - a) * self.ms0 + a * self.ms1)))
+        else:
+            a = deg/90. - 1.
+            self.pwm.set_pwm(self.ch, 
+                             round(self.coeff * self.offset), 
+                             round(self.coeff * ((1. - a) * self.ms1 + a * self.ms2)))        
+
+    def __del__(self):
+        print(f"DS3218 object on channel {self.ch} is being deleted")
+        self.setDegree(0)
+        time.sleep(0.5)
+
+class HS5086WP:
+
+    def __init__(self, ch_IN):
+
+        self.ms0 = 0.9
+        self.deg0 = 0.
+
+        self.ms1 = 2.1
+        self.deg1 = 180.
+
+        self.freq = 60.
+        self.pwm = PCA9685(address=0x40)
+        self.pwm.set_pwm_freq(self.freq)
+
+        self.ch = ch_IN
+
+        self.coeff = 4096. * self.freq / 1000. # 1000はmsをsに変換するため
+
+    def setDegree(self, deg):
+        a = deg/180.
+        self.pwm.set_pwm_offonly(self.ch, round(self.coeff * (a * self.ms1 +  (1. - a) * self.ms0)))
+
+    def __del__(self):
+        print(f"HS5086WP object on channel {self.ch} is being deleted")
+        self.setDegree(0)
+        time.sleep(0.5)

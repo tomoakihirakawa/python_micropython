@@ -17,7 +17,12 @@
 ## [lib](./lib/README.md)
 
 - [Contents](./lib/README.md#Contents)
+- [🤖PWM制御を行うためのPCA9685の使い方](./lib/README.md#🤖PWM制御を行うためのPCA9685の使い方)
     - [⚙️PCA9685](./lib/README.md#⚙️PCA9685)
+- [🤖サーボモーターのクラス](./lib/README.md#🤖サーボモーターのクラス)
+    - [⚙️MG996R](./lib/README.md#⚙️MG996R)
+    - [⚙️DS3218](./lib/README.md#⚙️DS3218)
+    - [⚙️HS-5086WP](./lib/README.md#⚙️HS-5086WP)
 ## [example_PressureSensor](./example_PressureSensor/README.md)
 
 - [使い方](./example_PressureSensor/README.md#使い方)
@@ -27,6 +32,10 @@
 - [Contents](./example_ServoMotor/README.md#Contents)
 - [🤖サーボモーターの制御](./example_ServoMotor/README.md#🤖サーボモーターの制御)
     - [⚙️準備](./example_ServoMotor/README.md#⚙️準備)
+- [🤖🤖サーボモーターのクラス](./example_ServoMotor/README.md#🤖🤖サーボモーターのクラス)
+    - [⚙️⚙️MG996R](./example_ServoMotor/README.md#⚙️⚙️MG996R)
+    - [⚙️⚙️DS3218](./example_ServoMotor/README.md#⚙️⚙️DS3218)
+    - [⚙️⚙️HS-5086WP](./example_ServoMotor/README.md#⚙️⚙️HS-5086WP)
     - [⚙️例）サーボモーター1つの制御](./example_ServoMotor/README.md#⚙️例）サーボモーター1つの制御)
     - [⚙️例）複数のサーボモーターの制御](./example_ServoMotor/README.md#⚙️例）複数のサーボモーターの制御)
     - [⚙️ライトヒルのロボットの制御](./example_ServoMotor/README.md#⚙️ライトヒルのロボットの制御)
