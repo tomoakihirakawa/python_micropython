@@ -2,16 +2,12 @@
 
 ## PCA9685
 
-PCA9685は，12bitのPWMコントローラなので，各PWM周期は4096個のステップに分割され，どのタイミングでON/OFFするかを指定できる．
-
-抑えておきたいのは，
-
 * PWMの周波数を生成するようPCA9685を設定する方法
 * デューティーサイクルを決める，PWMパルスのオンとオフのタイミングを指定する方法
 
 ### 50Hzを作る
 
-PCA9685内部クロック周波数は25MHz．
+PCA9685の内部クロック周波数は25MHz．
 PWM周期$`T_{\rm PWM}`$の中に4096個のステップが入るようにprescaleを設定する．
 いいかえると，1秒間に$`4096/T_{\rm PWM}=4096 f_{\rm PWM}`$回のステップがはいるようにPCA9685のクロックを設定する．
 これには，以下の式を満たすようにprescaleを設定すればよいことがわかる．
@@ -21,8 +17,8 @@ PWM周期$`T_{\rm PWM}`$の中に4096個のステップが入るようにprescal
 \begin{aligned}
 4096 f_{\rm PWM} &= 25M / (prescale+1)\\
 \rightarrow prescale &= \frac{25M}{4096 f_{\rm PWM}} - 1
-\begin{end}
-\begin{end}
+\begin{aligned}
+\begin{equation}
 ```
 
 '''
