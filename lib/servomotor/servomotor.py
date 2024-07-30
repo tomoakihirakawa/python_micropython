@@ -70,7 +70,7 @@ class MG996R:
 
 class DS3218:
 
-    def __init__(self, ch_IN, pwm,  mode='180'):
+    def __init__(self, ch_IN, pwm,  mode='270'):
         self.pwm = pwm
 
         self.offset = 0.5 # 0.5ms
@@ -79,14 +79,14 @@ class DS3218:
         self.ms1 = 1.5 # 1.5ms
         self.ms2 = 2.5 # 2.5ms
 
-        if mode == '180':
-            self.deg0 = 0.
-            self.deg1 = 90.
-            self.deg2 = 180.
-        else:
+        if mode == '270':
             self.deg0 = 0.
             self.deg1 = 135.
             self.deg2 = 270.
+        else:
+            self.deg0 = 0.
+            self.deg1 = 90.
+            self.deg2 = 180.
 
         self.freq = 60.
         self.pwm = PCA9685(address=0x40)

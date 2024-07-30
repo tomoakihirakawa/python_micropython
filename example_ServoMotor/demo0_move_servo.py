@@ -41,8 +41,6 @@ from パッケージ名 import *
 
 </details>
 
-\insert{servomotor_calss}
-
 ## 例）サーボモーター1つの制御
 
 ここでは，以下のようにインポートしたが
