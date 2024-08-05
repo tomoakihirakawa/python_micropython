@@ -2,6 +2,8 @@
 
 # ステッピングモーターの制御
 
+<img src="sample_linear_guide.gif" style="width: 300px; display: block; margin: 0 auto;">
+
 ステッピングモーターは１パルスごとに一定の角度だけ回転する．
 このStepperMotorクラスでは，StepperMotor.runメソッドを定義し，その中でモーターを制御する．
 
@@ -48,7 +50,6 @@ def position_func(t):
 ```
 
 ただ，振幅A=40[mm]，周期T=0.5[s]だと，モーターが追いつかないようだ．
-
 
 '''
 
