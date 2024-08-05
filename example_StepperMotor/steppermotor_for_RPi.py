@@ -2,7 +2,7 @@
 
 # ステッピングモーターの制御
 
-<img src="sample_linear_guide.gif" style="width: 300px; display: block; margin: 0 auto;">
+<img src="sample_linear_guide.gif" style="width: 600px; display: block; margin: 0 auto;">
 
 ステッピングモーターは１パルスごとに一定の角度だけ回転する．
 このStepperMotorクラスでは，StepperMotor.runメソッドを定義し，その中でモーターを制御する．
