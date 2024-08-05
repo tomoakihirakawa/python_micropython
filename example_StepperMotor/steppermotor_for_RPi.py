@@ -14,7 +14,7 @@ motor = StepperMotor(dir_pin=12, step_pin=13, dxdq=8, pulse_per_rev=6400)
 ```
 
 `dxdq`[mm]はモーターの規格で決まるものではなく，リニアガイドのピッチ[mm]である．
-`pulse_per_rev`もモーターの規格で決丸ものではなく，モータードライバの設定による．
+`pulse_per_rev`もモーターの規格で決まるものではなく，モータードライバの設定による．
 
 ```python
 thread_process_loop = threading.Thread(target=motor.run, args=(position_func, stop_condition)) #スレッドを作成と同時に実行する関数をわたす
