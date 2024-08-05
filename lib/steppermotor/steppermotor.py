@@ -199,6 +199,68 @@ class steppermotor():
 ##! -------------------------------------------------------- #
 ##! -------------------------------------------------------- #
 
+# ---------------------------------------------------------------------------- #
+
+# ラズパイ用のステッピングモーターのクラス
+
+from gpiozero import OutputDevice
+from time import sleep, time_ns, time
+import time
+import math
+
+class StepperMotor:
+    def __init__(self, dir_pin, step_pin, **kwargs):
+        self.Pin_dir = OutputDevice(dir_pin)
+        self.Pin_step = OutputDevice(step_pin)
+
+        self.Pin_dir.value = 1        
+        self.DIR = 1
+        self.dxdq = getattr(self, 'dxdq', 8)  # [mm/rad] 角度と距離の比（リニアガイドを使う場合に必要）
+        self.pulse_per_rev = getattr(self, 'pulse_per_rev', 6400) # 1回転するのに必要なパルス数
+        self.dqdpulse = 2.*math.pi/self.pulse_per_rev # [rad/pulse] 1パルスあたりの角度
+
+    def run(self, position_func, stop_condition=None):
+        self.running = True
+        count = 0
+        pulse = 0 # 現在のステップ軸での位置
+        x = 0 # 現在のリニアガイド上での位置
+
+
+        start_time = time.perf_counter()
+        def elapsed_time():
+            return time.perf_counter() - start_time
+
+        while self.running:
+
+            t = elapsed_time()
+            steps_needed = round(position_func(t) - x)
+
+            if steps_needed > 0 and self.DIR == 0:
+                self.Pin_dir.value = self.DIR = 1  # Positive direction
+            elif steps_needed < 0 and self.DIR == 1:
+                self.Pin_dir.value = self.DIR = 0
+
+            for _ in range(abs(steps_needed)):
+ 
+                self.Pin_step.on()
+
+                if self.DIR == 1:
+                    pulse += 1
+                    x += self.dxdq * self.dqdpulse
+                else:
+                    pulse -= 1
+                    x -= self.dxdq * self.dqdpulse
+                count += 1
+
+                self.Pin_step.off()
+
+
+            if stop_condition is not None and stop_condition(t):
+                self.running = False
+
+
+
+# ---------------------------------------------------------------------------- #
 
 if __name__ == '__main__':
 
