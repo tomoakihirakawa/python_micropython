@@ -1,15 +1,3 @@
-'''DOC_EXTRACT 0_2_servomotor
-
-## ライトヒルのロボットの制御
-
-ライトヒルの曲線に，ロボットの節が乗るようにするためのサーボモーターの角度の計算方法は他の場所で説明している．
-ここでは，実査によって得られた角度を各モーターに与えてみる．
-やることは，複数のサーボモーターの制御と同じ．
-
-![sample_lighthill.gif](sample_lighthill.gif)
-
-'''
-
 import math
 from lib.servomotor import *
 from time import sleep, time_ns
@@ -45,3 +33,4 @@ while True:
     for i, angle in enumerate(robot.getAngles(current_time)):
         s[i].setDegree(90 + angle * to_degree)
     sleep(0.01)  # Adjust delay as needed for your servomotor update rate
+

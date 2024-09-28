@@ -5,6 +5,8 @@
 やり方は，サーボモーター一つの場合と同じ．
 これは，配列にサーボモーターのインスタンスを格納して実行した例．
 
+\insert{servomotor_calss}
+
 '''
 
 from lib.servomotor import *
