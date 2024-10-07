@@ -2,6 +2,20 @@ import numpy as np
 import cv2
 import math
 
+
+def configure_camera_resolution(cap, width, height):
+    """
+    カメラの解像度を設定する関数
+
+    Parameters:
+    cap (cv2.VideoCapture): カメラのVideoCaptureオブジェクト
+    width (int): 設定したいフレームの横幅
+    height (int): 設定したいフレームの高さ
+    """
+    # 解像度を設定
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
 def capture_and_split_frames(cap):
     ret, frame = cap.read()
     if not ret:
@@ -50,7 +64,7 @@ def getEstimatedPosition(p,q,f=1.8, b=60., Ry=1280., Rz=720.,HFOV=120., aspect_r
     # カメラを前から見て，左下が原点で，右がx軸の正方向，上がy軸の正方向，手前がz軸の正方向となるような座標系を仮定している．
     [py,pz] = p
     [qy,qz] = q
-    eps = 10.**-20    
+    eps = 1e-20
     v1x = (b * Ry)/(2 * math.tan(HFOV/180. * math.pi / 2.) * (-py + qy + eps))
     v1y = (2*b*py - b*Ry)/(2*py - 2*qy + eps)
     v1z = (b * Ry * (pz + qz - Rz))/(2 *aspect_ratio* (py - qy + eps) *Rz)    
@@ -66,9 +80,12 @@ def gamma_correction(image, gamma=1.0):
 
 def process_mask(mask):
     # Define kernels
-    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
-    kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
-    
+    # kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
+    # kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
+
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
+
     # Apply morphological operations
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close)
@@ -96,12 +113,13 @@ def extract_color_and_find_centroids(frame, HSV_vec, range_vec, area_threshold, 
     mask = create_mask(hsv_frame, hue_bounds, HSV_vec, range_vec)
     mask = process_mask(mask)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # コンツアを面積順に並べ替える
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
+    # # contoursを面積順に並べ替える
+    # contours = sorted(contours, key=cv2.contourArea, reverse=True)
     # Filter contours by area and shape
+
     centroids = []
+    centroids_sum = []
     for contour in contours:
         if cv2.contourArea(contour) >= area_threshold:
             M = cv2.moments(contour)
@@ -109,7 +127,14 @@ def extract_color_and_find_centroids(frame, HSV_vec, range_vec, area_threshold, 
                 cX = int(M["m10"] / M["m00"])
                 cY = int(M["m01"] / M["m00"])
                 centroids.append((cX, cY))
+                centroids_sum.append(cX + cY)
             if len(centroids) >= max_num_objects:
                 break
+
+    def centroids_sum(centroid):
+        return centroid[0] + centroid[1]
+
+    # 関数としてcentroids_sumを使用
+    centroids = sorted(centroids, key=centroids_sum)
 
     return frame, mask, hsv_frame, centroids
